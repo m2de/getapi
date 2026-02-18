@@ -201,13 +201,13 @@ fn cmd_resume(registry: &RecipeRegistry, provider: &str, cli: &Cli) -> Result<()
 
     // Restore template vars from choices
     for (step_id, chosen_label) in &session.choices_made {
-        if let Some(step) = recipe.steps.iter().find(|s| s.id() == step_id) {
-            if let recipe::types::Step::PromptChoice { choices, .. } = step {
-                if let Some(chosen) = choices.iter().find(|c| &c.label == chosen_label) {
-                    if let Some(ref sets) = chosen.sets {
-                        for (k, v) in sets {
-                            ctx.set_var(k.clone(), v.clone());
-                        }
+        if let Some(recipe::types::Step::PromptChoice { choices, .. }) =
+            recipe.steps.iter().find(|s| s.id() == step_id)
+        {
+            if let Some(chosen) = choices.iter().find(|c| &c.label == chosen_label) {
+                if let Some(ref sets) = chosen.sets {
+                    for (k, v) in sets {
+                        ctx.set_var(k.clone(), v.clone());
                     }
                 }
             }
