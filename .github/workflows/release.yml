@@ -197,10 +197,51 @@ jobs:
     needs: github-release
     runs-on: ubuntu-latest
     steps:
-      - uses: mislav/bump-homebrew-formula-action@v3
-        with:
-          formula-name: getapi
-          homebrew-tap: m2de/homebrew-tap
-          download-url: https://github.com/m2de/getapi/archive/refs/tags/${{ github.ref_name }}.tar.gz
+      - name: Update Homebrew formula
         env:
           COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+
+          ARM_URL="https://github.com/m2de/getapi/releases/download/${GITHUB_REF_NAME}/getapi-aarch64-apple-darwin.tar.gz"
+          X64_URL="https://github.com/m2de/getapi/releases/download/${GITHUB_REF_NAME}/getapi-x86_64-apple-darwin.tar.gz"
+
+          ARM_SHA=$(curl -sL "$ARM_URL" | sha256sum | cut -d' ' -f1)
+          X64_SHA=$(curl -sL "$X64_URL" | sha256sum | cut -d' ' -f1)
+
+          cat > /tmp/getapi.rb <<FORMULA
+          class Getapi < Formula
+            desc "Guided, interactive walkthroughs for setting up developer API credentials"
+            homepage "https://github.com/m2de/getapi"
+            version "${VERSION}"
+            license "MIT"
+
+            on_arm do
+              url "${ARM_URL}"
+              sha256 "${ARM_SHA}"
+            end
+
+            on_intel do
+              url "${X64_URL}"
+              sha256 "${X64_SHA}"
+            end
+
+            def install
+              bin.install "getapi"
+            end
+
+            test do
+              assert_match "getapi", shell_output("#{bin}/getapi --help")
+            end
+          end
+          FORMULA
+
+          # Push to tap repo
+          git clone "https://x-access-token:${COMMITTER_TOKEN}@github.com/m2de/homebrew-tap.git" /tmp/tap
+          cp /tmp/getapi.rb /tmp/tap/Formula/getapi.rb
+          cd /tmp/tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/getapi.rb
+          git commit -m "Update getapi to ${VERSION}"
+          git push
