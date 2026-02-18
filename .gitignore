@@ -21,6 +21,9 @@
 # Claude Code
 .claude/
 
+# Generated site output
+site/
+
 # npm platform binary artefacts
 npm/*/bin/getapi
 npm/*/bin/getapi.exe

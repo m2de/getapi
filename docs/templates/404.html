@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found — getapi{% endblock %}
+{% block description %}The page you're looking for doesn't exist.{% endblock %}
+
+{% block content %}
+<div class="error-page">
+  <h1>404</h1>
+  <p>This page doesn't exist. It might have been moved or removed.</p>
+  <a href="{{ base_url }}/">Browse all providers</a>
+</div>
+{% endblock %}

@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ provider.display_name }} Setup Guide — getapi{% endblock %}
+{% block description %}Step-by-step guide to set up {{ provider.display_name }} credentials. {{ provider.description }}{% endblock %}
+{% block canonical %}https://m2de.github.io/getapi/{{ provider.id }}{% endblock %}
+{% block og_type %}article{% endblock %}
+{% block og_title %}{{ provider.display_name }} Setup Guide — getapi{% endblock %}
+{% block og_description %}{{ provider.description }}{% endblock %}
+{% block og_url %}https://m2de.github.io/getapi/{{ provider.id }}{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  "name": "Set up {{ provider.display_name }} credentials",
+  "description": "{{ provider.description }}",
+  "totalTime": "{{ estimated_time_iso }}",
+  "tool": { "@type": "HowToTool", "name": "getapi CLI" },
+  "step": [
+    {% for step in provider.steps %}
+    {
+      "@type": "HowToStep",
+      "position": {{ loop.index }},
+      "name": "{{ step.type | replace('_', ' ') | capitalize }}",
+      "text": {{ step.message | tojson }}
+    }{{ "," if not loop.last }}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="provider-page">
+  <!-- Header -->
+  <header class="provider-header">
+    <h1>{{ provider.display_name }}</h1>
+    <p class="provider-desc">{{ provider.description }}</p>
+    <div class="provider-meta">
+      <span>⏱ {{ provider.estimated_time }}</span>
+      <span>
+        {% for c in provider.category %}
+        <span class="card-pill">{{ c }}</span>
+        {% endfor %}
+      </span>
+      {% if provider.website %}
+      <a href="{{ provider.website }}" rel="noopener" target="_blank">{{ provider.website | replace('https://', '') }}</a>
+      {% endif %}
+    </div>
+    <div class="command-block">getapi {{ provider.id }}</div>
+  </header>
+
+  <!-- Prerequisites -->
+  {% if provider.prerequisites %}
+  <section class="prereqs">
+    <h2 class="section-title">Prerequisites</h2>
+    <ul>
+      {% for p in provider.prerequisites %}
+      <li>{{ p }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <!-- Outputs -->
+  {% if provider.outputs %}
+  <section class="outputs-section">
+    <h2 class="section-title">Credentials</h2>
+    <table class="outputs-table">
+      <thead>
+        <tr>
+          <th>Variable</th>
+          <th>Description</th>
+          <th>Sensitive</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in provider.outputs %}
+        <tr>
+          <td><code>{{ o.key }}</code></td>
+          <td>{{ o.description }}</td>
+          <td>
+            {% if o.sensitive %}
+            <span class="sensitive-badge">
+              <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a4 4 0 0 0-4 4v2H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V5a4 4 0 0 0-4-4zm2 6H6V5a2 2 0 1 1 4 0v2z"/></svg>
+              Secret
+            </span>
+            {% else %}
+            <span style="color: var(--text-muted);">Public</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+  {% endif %}
+
+  <!-- Steps -->
+  <section class="steps-section">
+    <h2 class="section-title">Setup Steps</h2>
+    <ol class="step-list">
+      {% for step in provider.steps %}
+      <li class="step step--{{ step.type }}" id="step-{{ step.id }}">
+        <span class="step-number">{{ loop.index }}</span>
+        <span class="step-type-label">{{ step_type_labels.get(step.type, step.type) }}</span>
+
+        <div class="step-message">
+          <p>{{ step.message_html }}</p>
+
+          {# open_url: show link #}
+          {% if step.type == "open_url" and step.url %}
+          <a class="step-url" href="{{ step.url }}" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v2.69a.75.75 0 0 0 1.5 0V2.75a.75.75 0 0 0-.75-.75h-4.5a.75.75 0 0 0 0 1.5h2.69L6.22 8.72z"/><path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5z"/></svg>
+            {{ step.url }}
+          </a>
+          {% endif %}
+
+          {# prompt_confirm: show checkpoint #}
+          {% if step.type == "prompt_confirm" %}
+          <div class="step-confirm-box">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="var(--step-prompt-confirm)"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm3.78-9.72a.75.75 0 0 0-1.06-1.06L7 8.94 5.28 7.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25z"/></svg>
+            Checkpoint — confirm before continuing
+          </div>
+          {% endif %}
+
+          {# prompt_input: show env var and validation hint #}
+          {% if step.type == "prompt_input" %}
+          <div class="step-input-block">
+            {% if step.output_key %}
+            <div class="env-var">→ {{ step.output_key }}</div>
+            {% endif %}
+            {% if step.validation_hint %}
+            <div class="hint">{{ step.validation_hint }}</div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# prompt_choice: show choices #}
+          {% if step.type == "prompt_choice" and step.choices %}
+          <ul class="step-choices">
+            {% for choice in step.choices %}
+            <li>
+              <div class="choice-label">{{ choice.label }}</div>
+              {% if choice.next %}
+              <div class="choice-meta">→ Jumps to <a href="#step-{{ choice.next }}">{{ choice.next }}</a></div>
+              {% endif %}
+              {% if choice.sets %}
+              <div class="choice-meta">Configures: {{ choice.sets.keys() | join(', ') }}</div>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+
+          {# validate: show outcomes #}
+          {% if step.type == "validate" %}
+          <div class="step-validate-outcomes">
+            {% if step.on_success %}
+            <div class="outcome outcome--success">
+              <span class="outcome-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm3.78-9.72a.75.75 0 0 0-1.06-1.06L7 8.94 5.28 7.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25z"/></svg>
+              </span>
+              {{ step.on_success }}
+            </div>
+            {% endif %}
+            {% if step.on_failure %}
+            <div class="outcome outcome--failure">
+              <span class="outcome-icon">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zM5.22 5.22a.75.75 0 0 1 1.06 0L8 6.94l1.72-1.72a.75.75 0 1 1 1.06 1.06L9.06 8l1.72 1.72a.75.75 0 1 1-1.06 1.06L8 9.06l-1.72 1.72a.75.75 0 0 1-1.06-1.06L6.94 8 5.22 6.28a.75.75 0 0 1 0-1.06z"/></svg>
+              </span>
+              {{ step.on_failure }}
+            </div>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# wait: show hint #}
+          {% if step.type == "wait" %}
+          <div class="step-input-block">
+            <div class="hint">⏳ This step may take some time. Resume with: <code>getapi resume</code></div>
+          </div>
+          {% endif %}
+
+          {# run_command: show command block #}
+          {% if step.type == "run_command" and step.command %}
+          <pre>{{ step.command }}</pre>
+          {% endif %}
+
+          {# copy_to_clipboard #}
+          {% if step.type == "copy_to_clipboard" and step.value %}
+          <div class="step-input-block">
+            <div class="env-var">📋 {{ step.value }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <!-- Gotchas -->
+  {% if provider.gotchas %}
+  <section class="gotchas">
+    <h2 class="section-title">Things to Know</h2>
+    <ul class="gotcha-list">
+      {% for g in provider.gotchas %}
+      <li>{{ g }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <!-- Footer metadata -->
+  <div class="provider-footer">
+    {% if provider.version %}
+    <span>Recipe v{{ provider.version }}</span>
+    {% endif %}
+    {% if provider.last_verified %}
+    <span>Last verified: {{ provider.last_verified }}</span>
+    {% endif %}
+    <a href="https://github.com/m2de/getapi/blob/main/providers/{{ provider.id }}.json">View raw JSON</a>
+    <a href="https://github.com/m2de/getapi/edit/main/providers/{{ provider.id }}.json">Edit this recipe</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}getapi — API Credential Setup Guides{% endblock %}
+{% block description %}Step-by-step guides for setting up API credentials for {{ providers | length }} popular services. Stop Googling — just run getapi.{% endblock %}
+{% block canonical %}https://m2de.github.io/getapi{% endblock %}
+{% block og_title %}getapi — API Credential Setup Guides{% endblock %}
+{% block og_description %}Step-by-step guides for setting up API credentials for {{ providers | length }} popular services.{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "getapi",
+  "description": "CLI tool that walks you through setting up API credentials for popular services.",
+  "url": "https://m2de.github.io/getapi",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "macOS, Linux, Windows",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "license": "https://opensource.org/licenses/MIT"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+  <h1>Stop Googling API setup docs</h1>
+  <p>Step-by-step interactive guides for setting up API credentials. Browse the guides below, or install the CLI and follow along in your terminal.</p>
+  <div class="install-block">cargo install getapi</div>
+</section>
+
+<section class="filters">
+  <input
+    type="text"
+    class="search-input"
+    id="search"
+    placeholder="Search providers…"
+    autocomplete="off"
+    aria-label="Search providers"
+  >
+  <div class="category-pills" id="pills">
+    <button class="pill active" data-category="all">All</button>
+    {% for cat in categories %}
+    <button class="pill" data-category="{{ cat }}">{{ cat }}</button>
+    {% endfor %}
+  </div>
+</section>
+
+<div class="grid" id="grid">
+  {% for p in providers %}
+  <a class="card" href="{{ base_url }}/{{ p.id }}/" data-name="{{ p.display_name | lower }}" data-desc="{{ p.description | lower }}" data-categories="{{ p.category | join(' ') | lower }}">
+    <div class="card-name">{{ p.display_name }}</div>
+    <div class="card-desc">{{ p.description }}</div>
+    <div class="card-meta">
+      <div class="card-pills">
+        {% for c in p.category %}
+        <span class="card-pill">{{ c }}</span>
+        {% endfor %}
+      </div>
+      <span class="card-outputs">{{ p.outputs | length }} credential{{ "s" if p.outputs | length != 1 }}</span>
+      <span class="card-time">~{{ p.estimated_time }}</span>
+    </div>
+  </a>
+  {% endfor %}
+  <div class="no-results" id="no-results">No providers match your search.</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var search = document.getElementById('search');
+  var pills = document.querySelectorAll('.pill');
+  var cards = document.querySelectorAll('.card');
+  var noResults = document.getElementById('no-results');
+  var activeCat = 'all';
+
+  function filter() {
+    var q = search.value.toLowerCase().trim();
+    var visible = 0;
+    cards.forEach(function(card) {
+      var name = card.getAttribute('data-name');
+      var desc = card.getAttribute('data-desc');
+      var cats = card.getAttribute('data-categories');
+      var matchSearch = !q || name.indexOf(q) !== -1 || desc.indexOf(q) !== -1;
+      var matchCat = activeCat === 'all' || (' ' + cats + ' ').indexOf(' ' + activeCat + ' ') !== -1;
+      var show = matchSearch && matchCat;
+      card.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+    noResults.style.display = visible === 0 ? 'block' : 'none';
+  }
+
+  search.addEventListener('input', filter);
+
+  pills.forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      pills.forEach(function(p) { p.classList.remove('active'); });
+      pill.classList.add('active');
+      activeCat = pill.getAttribute('data-category');
+      filter();
+    });
+  });
+})();
+</script>
+{% endblock %}

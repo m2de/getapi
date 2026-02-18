@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}getapi{% endblock %}</title>
+  <meta name="description" content="{% block description %}Step-by-step guides for setting up API credentials. Stop Googling — just run getapi.{% endblock %}">
+  <link rel="icon" href="{{ base_url }}/assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="{% block canonical %}https://m2de.github.io/getapi{% endblock %}">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}getapi{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}Step-by-step guides for setting up API credentials.{% endblock %}">
+  <meta property="og:url" content="{% block og_url %}https://m2de.github.io/getapi{% endblock %}">
+  <meta property="og:site_name" content="getapi">
+
+  <link rel="stylesheet" href="{{ base_url }}/assets/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <nav class="nav">
+    <div class="nav-inner">
+      <a class="nav-logo" href="{{ base_url }}/">getapi</a>
+      <ul class="nav-links">
+        <li><a href="{{ base_url }}/">Providers</a></li>
+        <li><a href="https://github.com/m2de/getapi" rel="noopener">GitHub</a></li>
+        <li><a href="https://github.com/m2de/getapi#install" rel="noopener">Install</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <span>getapi — MIT Licence</span>
+    <span>
+      <a href="https://github.com/m2de/getapi">Source</a> · <a href="https://github.com/m2de/getapi/issues">Issues</a>
+    </span>
+  </footer>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>
