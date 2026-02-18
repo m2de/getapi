@@ -171,12 +171,20 @@ jobs:
             "getapi-cli-win32-x64"
           )
 
+          failed=""
           for pkg in "${PLATFORMS[@]}"; do
             echo "Publishing ${pkg}..."
             cd "npm/${pkg}"
-            npm publish --access public
+            if ! npm publish --access public; then
+              echo "::warning::Failed to publish ${pkg}"
+              failed="${failed} ${pkg}"
+            fi
             cd ../..
           done
+
+          if [ -n "$failed" ]; then
+            echo "::warning::Some platform packages failed to publish:${failed}"
+          fi
 
       - name: Publish shim package
         env:
