@@ -26,7 +26,16 @@
 <section class="hero">
   <h1>Stop Googling API setup docs</h1>
   <p>Step-by-step interactive guides for setting up API credentials. Browse the guides below, or install the CLI and follow along in your terminal.</p>
-  <div class="install-block">cargo install getapi</div>
+  <div class="install-tabs" id="install-tabs">
+    <div class="install-tab-buttons">
+      <button class="install-tab active" data-tab="brew">Homebrew</button>
+      <button class="install-tab" data-tab="cargo">Cargo</button>
+      <button class="install-tab" data-tab="npm">npm</button>
+    </div>
+    <div class="install-panel active" data-tab="brew">brew install m2de/tap/getapi</div>
+    <div class="install-panel" data-tab="cargo">cargo install getapi</div>
+    <div class="install-panel" data-tab="npm">npx getapi-cli list</div>
+  </div>
 </section>
 
 <section class="filters">
@@ -68,6 +77,19 @@
 
 {% block scripts %}
 <script>
+(function() {
+  var tabs = document.querySelectorAll('.install-tab');
+  var panels = document.querySelectorAll('.install-panel');
+  tabs.forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      var t = tab.getAttribute('data-tab');
+      tabs.forEach(function(b) { b.classList.remove('active'); });
+      panels.forEach(function(p) { p.classList.remove('active'); });
+      tab.classList.add('active');
+      document.querySelector('.install-panel[data-tab="' + t + '"]').classList.add('active');
+    });
+  });
+})();
 (function() {
   var search = document.getElementById('search');
   var pills = document.querySelectorAll('.pill');

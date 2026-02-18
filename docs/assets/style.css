@@ -171,15 +171,68 @@ main {
   margin: 0 auto 2rem;
 }
 
-.install-block {
-  display: inline-block;
+.install-tabs {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  max-width: 480px;
+  width: 100%;
+}
+
+.install-tab-buttons {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+  background: var(--bg-secondary);
+  width: 100%;
+}
+
+.install-tab {
+  flex: 1;
+  padding: 0.5rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+  border-right: 1px solid var(--border);
+}
+
+.install-tab:last-child {
+  border-right: none;
+}
+
+.install-tab:hover {
+  color: var(--text);
+}
+
+.install-tab.active {
+  background: var(--bg-code);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.install-panel {
+  display: none;
+  width: 100%;
   background: var(--bg-code);
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: 0 0 8px 8px;
   padding: 0.75rem 1.5rem;
   font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.9375rem;
   color: var(--text);
+  text-align: left;
+}
+
+.install-panel.active {
+  display: block;
 }
 
 /* ===== Search & Filters ===== */
