@@ -21,7 +21,7 @@ jobs:
             npm-pkg: getapi-cli-darwin-arm64
             cross: false
           - target: x86_64-apple-darwin
-            runner: macos-13
+            runner: macos-14
             npm-pkg: getapi-cli-darwin-x64
             cross: false
           - target: x86_64-unknown-linux-gnu
