@@ -1,0 +1,87 @@
+{
+  "schema_version": "1",
+  "id": "openai",
+  "display_name": "OpenAI API",
+  "description": "Set up API access for GPT, DALL-E, Whisper, and other OpenAI models.",
+  "category": ["ai", "llm"],
+  "website": "https://platform.openai.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "An OpenAI account"
+  ],
+  "outputs": [
+    {
+      "key": "OPENAI_API_KEY",
+      "description": "API key for authenticating requests",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get you an OpenAI API key. You'll need to add a payment method if you haven't already — OpenAI's API is pay-per-use."
+    },
+    {
+      "id": "open_keys",
+      "type": "open_url",
+      "url": "https://platform.openai.com/api-keys",
+      "message": "Opening the OpenAI API keys page. Sign in if prompted."
+    },
+    {
+      "id": "check_billing",
+      "type": "prompt_choice",
+      "message": "Do you have a payment method on file?",
+      "choices": [
+        { "label": "Yes, billing is set up", "next": "create_key" },
+        { "label": "No / Not sure", "next": "setup_billing" }
+      ]
+    },
+    {
+      "id": "setup_billing",
+      "type": "open_url",
+      "url": "https://platform.openai.com/settings/organization/billing/overview",
+      "message": "Opening billing settings. Add a payment method to enable API access."
+    },
+    {
+      "id": "confirm_billing",
+      "type": "prompt_confirm",
+      "message": "Payment method added?"
+    },
+    {
+      "id": "create_key",
+      "type": "info",
+      "message": "Click '+ Create new secret key'. Give it a descriptive name (e.g. your project name). Leave permissions as 'All' unless you need to restrict access."
+    },
+    {
+      "id": "collect_key",
+      "type": "prompt_input",
+      "output_key": "OPENAI_API_KEY",
+      "message": "Paste your API key here (starts with sk-):",
+      "validation": "^sk-[a-zA-Z0-9_-]{20,}$",
+      "validation_error": "That doesn't look like a valid OpenAI API key. It should start with 'sk-' followed by a long string."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_key"],
+      "message": "Checking your API key works...",
+      "on_success": "API key verified. You're all set.",
+      "on_failure": "Couldn't verify the API key. Make sure you have billing set up and the key is active.",
+      "config": {
+        "url": "https://api.openai.com/v1/models",
+        "api_key_field": "OPENAI_API_KEY"
+      }
+    }
+  ],
+  "gotchas": [
+    "API keys are only shown once when created. If you lose it, you'll need to create a new one.",
+    "New accounts get a small free credit, but it expires. After that, you pay per token.",
+    "Set a monthly spending limit in billing settings to avoid surprises.",
+    "Rate limits depend on your usage tier — new accounts start with lower limits."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

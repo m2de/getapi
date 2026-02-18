@@ -1,0 +1,100 @@
+{
+  "schema_version": "1",
+  "id": "notion",
+  "display_name": "Notion API",
+  "description": "Set up API access for reading and writing Notion pages, databases, and blocks.",
+  "category": ["productivity", "notes"],
+  "website": "https://www.notion.so",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Notion account",
+    "A Notion workspace where you have admin or member access"
+  ],
+  "outputs": [
+    {
+      "key": "NOTION_API_KEY",
+      "description": "Internal integration token (starts with ntn_ or secret_)",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a Notion internal integration and get an API token. You'll also need to share specific pages or databases with the integration before it can access them."
+    },
+    {
+      "id": "open_integrations",
+      "type": "open_url",
+      "url": "https://www.notion.so/my-integrations",
+      "message": "Opening the Notion integrations page. Sign in if prompted."
+    },
+    {
+      "id": "check_existing",
+      "type": "prompt_choice",
+      "message": "Do you already have an integration you want to use?",
+      "choices": [
+        { "label": "Create a new integration", "next": "create_integration" },
+        { "label": "Use an existing integration", "next": "select_existing" }
+      ]
+    },
+    {
+      "id": "create_integration",
+      "type": "info",
+      "message": "Click 'New integration'. Give it a name, select the workspace it belongs to, and choose its capabilities (Read content, Update content, Insert content). For full access, enable all content capabilities."
+    },
+    {
+      "id": "confirm_created",
+      "type": "prompt_confirm",
+      "message": "Integration created?"
+    },
+    {
+      "id": "select_existing",
+      "type": "info",
+      "message": "Click on your existing integration to view its settings."
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "NOTION_API_KEY",
+      "message": "Under 'Internal Integration Secret', click 'Show' and copy the token. Paste it here:",
+      "validation": "^(ntn_|secret_)[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look like a valid Notion integration token. It should start with 'ntn_' or 'secret_'."
+    },
+    {
+      "id": "share_pages",
+      "type": "info",
+      "message": "Important: The integration can only access pages and databases that have been explicitly shared with it. Go to any Notion page or database, click the '...' menu in the top right, select 'Connections', and add your integration."
+    },
+    {
+      "id": "confirm_shared",
+      "type": "prompt_confirm",
+      "message": "Shared at least one page or database with your integration?"
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token"],
+      "message": "Checking your integration token works...",
+      "on_success": "Integration token verified. Notion API is ready.",
+      "on_failure": "Couldn't verify the token. Make sure you copied it correctly and the integration is active.",
+      "config": {
+        "url": "https://api.notion.com/v1/users",
+        "api_key_field": "NOTION_API_KEY",
+        "headers.Notion-Version": "2022-06-28"
+      }
+    }
+  ],
+  "gotchas": [
+    "Integrations can ONLY access pages and databases explicitly shared with them. This is the most common source of 'not found' errors.",
+    "When you share a parent page, all child pages are also accessible. You don't need to share each one individually.",
+    "Notion API has a rate limit of 3 requests per second. Implement retry logic with exponential backoff.",
+    "The Notion API requires a 'Notion-Version' header (e.g., '2022-06-28'). Most Notion client libraries handle this automatically.",
+    "Internal integration tokens do not expire, but they can be revoked from the integrations page.",
+    "If using the API directly (not a client library), you must include both 'Authorization: Bearer <token>' and 'Notion-Version: 2022-06-28' headers."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

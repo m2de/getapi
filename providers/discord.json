@@ -1,0 +1,127 @@
+{
+  "schema_version": "1",
+  "id": "discord",
+  "display_name": "Discord Bot",
+  "description": "Set up a Discord bot with API access for messaging, moderation, and server management.",
+  "category": ["messaging", "social"],
+  "website": "https://discord.com/developers",
+  "auth_types": ["api_key"],
+  "estimated_time": "10 minutes",
+  "prerequisites": [
+    "A Discord account",
+    "A Discord server where you have 'Manage Server' permission (or create a test server)"
+  ],
+  "outputs": [
+    {
+      "key": "DISCORD_BOT_TOKEN",
+      "description": "Bot token for authenticating your bot with the Discord API",
+      "sensitive": true
+    },
+    {
+      "key": "DISCORD_APPLICATION_ID",
+      "description": "Application ID (also called Client ID) for your bot",
+      "sensitive": false
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a Discord application and bot, then get the credentials you need. You'll also need to invite the bot to a server."
+    },
+    {
+      "id": "open_portal",
+      "type": "open_url",
+      "url": "https://discord.com/developers/applications",
+      "message": "Opening the Discord Developer Portal. Sign in with your Discord account if prompted."
+    },
+    {
+      "id": "check_existing",
+      "type": "prompt_choice",
+      "message": "Do you already have a Discord application, or do you need to create one?",
+      "choices": [
+        { "label": "Create a new application", "next": "create_app" },
+        { "label": "Use an existing application", "next": "select_existing" }
+      ]
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Click 'New Application' in the top right. Give it a name (this will be your bot's default username) and accept the terms of service."
+    },
+    {
+      "id": "confirm_app",
+      "type": "prompt_confirm",
+      "message": "Application created? You should see its General Information page."
+    },
+    {
+      "id": "select_existing",
+      "type": "info",
+      "message": "Click on your existing application to open its settings."
+    },
+    {
+      "id": "collect_app_id",
+      "type": "prompt_input",
+      "output_key": "DISCORD_APPLICATION_ID",
+      "message": "On the 'General Information' page, copy the 'Application ID' and paste it here:",
+      "validation": "^[0-9]{17,20}$",
+      "validation_error": "That doesn't look like a valid Discord Application ID. It should be a numeric string (17-20 digits)."
+    },
+    {
+      "id": "setup_bot",
+      "type": "info",
+      "message": "In the left sidebar, click 'Bot'. If you haven't already, click 'Add Bot' and confirm. Under 'Privileged Gateway Intents', enable the intents your bot needs (Message Content Intent is required to read message text)."
+    },
+    {
+      "id": "confirm_bot",
+      "type": "prompt_confirm",
+      "message": "Bot section configured?"
+    },
+    {
+      "id": "reset_token",
+      "type": "info",
+      "message": "On the Bot page, click 'Reset Token' to generate a new bot token. You'll need to confirm with your password or 2FA code."
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "DISCORD_BOT_TOKEN",
+      "message": "Copy the bot token and paste it here (it won't be shown again):",
+      "validation": "^[A-Za-z0-9_-]{24,}\\.[A-Za-z0-9_-]{6}\\.[A-Za-z0-9_-]{27,}$",
+      "validation_error": "That doesn't look like a valid Discord bot token. It should be a long string with two dots separating three parts."
+    },
+    {
+      "id": "invite_bot",
+      "type": "info",
+      "message": "Now let's invite the bot to your server. Go to 'OAuth2' > 'URL Generator' in the left sidebar. Under 'Scopes', select 'bot'. Under 'Bot Permissions', choose the permissions your bot needs. Copy the generated URL at the bottom."
+    },
+    {
+      "id": "open_invite",
+      "type": "prompt_confirm",
+      "message": "Open the generated URL in your browser, select your server, and authorize the bot. Done?"
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token"],
+      "message": "Checking your bot token works...",
+      "on_success": "Bot token verified. Your Discord bot is ready.",
+      "on_failure": "Couldn't verify the bot token. Make sure you copied it correctly and the bot hasn't been deleted.",
+      "config": {
+        "url": "https://discord.com/api/v10/users/@me",
+        "header_name": "Authorization",
+        "header_value": "Bot {{DISCORD_BOT_TOKEN}}"
+      }
+    }
+  ],
+  "gotchas": [
+    "Bot tokens are shown only once after reset. If you lose it, you'll need to reset it again (which invalidates the old token).",
+    "The 'Message Content Intent' is a privileged intent. For bots in over 100 servers, you need to apply for verification to use it.",
+    "Discord rate limits are per-route. Respect the rate limit headers to avoid getting your bot temporarily banned.",
+    "Bot permissions are determined both by the OAuth2 invite URL AND the role assigned to the bot in the server.",
+    "For slash commands, you'll also need the 'applications.commands' scope in the OAuth2 URL."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

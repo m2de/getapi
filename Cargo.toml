@@ -1,0 +1,33 @@
+[package]
+name = "getapi"
+version = "0.1.0"
+edition = "2021"
+description = "Guided, interactive walkthroughs for setting up developer API credentials"
+authors = ["Marco Mark"]
+license = "MIT"
+repository = "https://github.com/m2de/getapi"
+homepage = "https://github.com/m2de/getapi"
+readme = "README.md"
+keywords = ["cli", "api", "credentials", "setup", "developer-tools"]
+categories = ["command-line-utilities", "development-tools"]
+exclude = [".github/", ".getapi/", ".claude/", ".env", "PRD.md", "npm/"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dialoguer = "0.11"
+console = "0.15"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+open = "5"
+rust-embed = "8"
+regex = "1"
+chrono = { version = "0.4", features = ["serde"] }
+thiserror = "2"
+arboard = "3"
+dirs = "6"
+
+[dev-dependencies]
+assert_cmd = "2"
+predicates = "3"
+tempfile = "3"

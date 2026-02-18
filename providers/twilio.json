@@ -1,0 +1,114 @@
+{
+  "schema_version": "1",
+  "id": "twilio",
+  "display_name": "Twilio SMS & Voice API",
+  "description": "Set up API access for sending SMS messages, making voice calls, and other communication services with Twilio.",
+  "category": ["messaging", "sms", "voice"],
+  "website": "https://www.twilio.com/console",
+  "auth_types": ["api_key"],
+  "estimated_time": "10 minutes",
+  "prerequisites": [
+    "A Twilio account (free trial available)",
+    "A phone number for receiving verification SMS during setup"
+  ],
+  "outputs": [
+    {
+      "key": "TWILIO_ACCOUNT_SID",
+      "description": "Account SID (starts with AC)",
+      "sensitive": false
+    },
+    {
+      "key": "TWILIO_AUTH_TOKEN",
+      "description": "Auth Token for authenticating API requests",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Twilio Account SID and Auth Token. Twilio's trial account lets you test SMS and voice for free (with some limitations). You'll also need a Twilio phone number to send messages from."
+    },
+    {
+      "id": "open_console",
+      "type": "open_url",
+      "url": "https://www.twilio.com/console",
+      "message": "Opening the Twilio Console. Sign in or create an account if prompted."
+    },
+    {
+      "id": "check_account",
+      "type": "prompt_choice",
+      "message": "What do you see?",
+      "choices": [
+        { "label": "The Twilio Console dashboard", "next": "collect_sid" },
+        { "label": "A sign-up or onboarding flow", "next": "complete_signup" }
+      ]
+    },
+    {
+      "id": "complete_signup",
+      "type": "info",
+      "message": "Complete the sign-up process. You'll need to verify your email and phone number. When asked what you want to build, select the option closest to your use case (e.g., 'Send SMS' or 'Make calls')."
+    },
+    {
+      "id": "confirm_signup",
+      "type": "prompt_confirm",
+      "message": "Sign-up complete? You should now see the Twilio Console dashboard."
+    },
+    {
+      "id": "collect_sid",
+      "type": "info",
+      "message": "On the Console dashboard, you'll see your 'Account SID' and 'Auth Token' in the 'Account Info' panel. The Auth Token is hidden by default -- click 'Show' to reveal it."
+    },
+    {
+      "id": "input_sid",
+      "type": "prompt_input",
+      "output_key": "TWILIO_ACCOUNT_SID",
+      "message": "Copy your Account SID and paste it here (starts with AC):",
+      "validation": "^AC[a-f0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Twilio Account SID. It should start with 'AC' followed by 32 hexadecimal characters."
+    },
+    {
+      "id": "input_token",
+      "type": "prompt_input",
+      "output_key": "TWILIO_AUTH_TOKEN",
+      "message": "Now copy your Auth Token and paste it here:",
+      "validation": "^[a-f0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Twilio Auth Token. It should be a 32-character hexadecimal string."
+    },
+    {
+      "id": "phone_number_check",
+      "type": "prompt_choice",
+      "message": "Do you have a Twilio phone number to send messages from?",
+      "choices": [
+        { "label": "Yes, I have one", "next": "done_info" },
+        { "label": "No, I need to get one", "next": "get_phone" }
+      ]
+    },
+    {
+      "id": "get_phone",
+      "type": "open_url",
+      "url": "https://www.twilio.com/console/phone-numbers/incoming",
+      "message": "Opening the Phone Numbers page. Click 'Buy a Number' or 'Get a Trial Number' to get a Twilio phone number for sending messages."
+    },
+    {
+      "id": "confirm_phone",
+      "type": "prompt_confirm",
+      "message": "Phone number acquired?"
+    },
+    {
+      "id": "done_info",
+      "type": "info",
+      "message": "Your Twilio credentials are collected. Note: Twilio uses HTTP Basic Auth (Account SID as username, Auth Token as password), so automated validation is skipped here. Test your credentials by sending a test message from the Twilio Console or with a quick API call."
+    }
+  ],
+  "gotchas": [
+    "Twilio trial accounts can only send messages to verified phone numbers. Add numbers at Console > Verified Caller IDs.",
+    "Trial messages are prefixed with 'Sent from your Twilio trial account.' Upgrade to a paid account to remove this.",
+    "The Auth Token can be rotated from the Console. Rotating it invalidates the old token immediately.",
+    "Twilio uses HTTP Basic Auth (SID:Token), not Bearer tokens. Most HTTP libraries handle this with a username/password parameter.",
+    "SMS pricing varies by country. Check https://www.twilio.com/sms/pricing for current rates.",
+    "You cannot validate these credentials automatically in this setup. Send a test SMS from the Twilio Console to confirm everything works."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

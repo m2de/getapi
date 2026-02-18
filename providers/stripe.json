@@ -1,0 +1,90 @@
+{
+  "schema_version": "1",
+  "id": "stripe",
+  "display_name": "Stripe API",
+  "description": "Set up API access for payment processing with Stripe.",
+  "category": ["payments", "fintech"],
+  "website": "https://dashboard.stripe.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Stripe account"
+  ],
+  "outputs": [
+    {
+      "key": "STRIPE_SECRET_KEY",
+      "description": "Secret key for server-side API calls",
+      "sensitive": true
+    },
+    {
+      "key": "STRIPE_PUBLISHABLE_KEY",
+      "description": "Publishable key for client-side use",
+      "sensitive": false
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Stripe API keys. Stripe gives you both test and live keys — we'll start with test keys so you can develop safely."
+    },
+    {
+      "id": "mode_choice",
+      "type": "prompt_choice",
+      "message": "Which keys do you need?",
+      "choices": [
+        { "label": "Test keys (for development)", "sets": { "stripe_mode": "Test mode is enabled by default. Make sure the 'Test mode' toggle is ON (top right of the dashboard)." } },
+        { "label": "Live keys (for production)", "sets": { "stripe_mode": "Switch to live mode by turning OFF the 'Test mode' toggle in the top right." } }
+      ]
+    },
+    {
+      "id": "open_keys",
+      "type": "open_url",
+      "url": "https://dashboard.stripe.com/apikeys",
+      "message": "Opening the Stripe API keys page. Sign in if prompted."
+    },
+    {
+      "id": "mode_info",
+      "type": "info",
+      "message": "{{stripe_mode}}"
+    },
+    {
+      "id": "collect_publishable",
+      "type": "prompt_input",
+      "output_key": "STRIPE_PUBLISHABLE_KEY",
+      "message": "Copy your Publishable key and paste it here:",
+      "validation": "^pk_(test|live)_[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look right. Stripe publishable keys start with 'pk_test_' or 'pk_live_'."
+    },
+    {
+      "id": "collect_secret",
+      "type": "prompt_input",
+      "output_key": "STRIPE_SECRET_KEY",
+      "message": "Now click 'Reveal test key' (or 'Reveal live key') and paste your Secret key:",
+      "validation": "^(sk|rk)_(test|live)_[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look right. Stripe secret keys start with 'sk_test_' or 'sk_live_'."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_secret"],
+      "message": "Checking your API key works...",
+      "on_success": "Stripe API key verified.",
+      "on_failure": "Couldn't verify the key. Make sure you copied the correct key.",
+      "config": {
+        "url": "https://api.stripe.com/v1/balance",
+        "header_name": "Authorization",
+        "header_value": "Bearer {{STRIPE_SECRET_KEY}}"
+      }
+    }
+  ],
+  "gotchas": [
+    "Test and live keys are completely separate. Transactions made with test keys don't move real money.",
+    "The secret key should NEVER be exposed client-side. Use the publishable key in the browser.",
+    "Restricted keys are available if you want to limit what the key can access.",
+    "Stripe's test card number is 4242 4242 4242 4242 with any future expiry and any CVC."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

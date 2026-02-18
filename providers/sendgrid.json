@@ -1,0 +1,114 @@
+{
+  "schema_version": "1",
+  "id": "sendgrid",
+  "display_name": "SendGrid Email API",
+  "description": "Set up API access for sending transactional and marketing emails with SendGrid.",
+  "category": ["email", "messaging"],
+  "website": "https://app.sendgrid.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "10 minutes",
+  "prerequisites": [
+    "A SendGrid account (free tier available at signup)",
+    "A verified sender email address or authenticated domain"
+  ],
+  "outputs": [
+    {
+      "key": "SENDGRID_API_KEY",
+      "description": "API key for authenticating requests to the SendGrid API",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a SendGrid API key for sending emails. You'll also need a verified sender identity before you can send any emails."
+    },
+    {
+      "id": "open_portal",
+      "type": "open_url",
+      "url": "https://app.sendgrid.com",
+      "message": "Opening the SendGrid dashboard. Sign in or create an account if prompted."
+    },
+    {
+      "id": "check_sender",
+      "type": "prompt_choice",
+      "message": "Do you have a verified sender identity (email or domain)?",
+      "choices": [
+        { "label": "Yes, I have a verified sender", "next": "create_key_nav" },
+        { "label": "No, I need to set one up", "next": "setup_sender" }
+      ]
+    },
+    {
+      "id": "setup_sender",
+      "type": "open_url",
+      "url": "https://app.sendgrid.com/settings/sender_auth",
+      "message": "Opening Sender Authentication settings. You can either verify a single sender email (quick) or authenticate an entire domain (recommended for production)."
+    },
+    {
+      "id": "sender_choice",
+      "type": "prompt_choice",
+      "message": "Which verification method do you want to use?",
+      "choices": [
+        { "label": "Single Sender Verification (quick, good for testing)", "sets": { "sender_note": "Click 'Verify a Single Sender', fill in your details, and click the verification link sent to your email." } },
+        { "label": "Domain Authentication (recommended for production)", "sets": { "sender_note": "Click 'Authenticate Your Domain' and follow the steps to add DNS records. This can take up to 48 hours to propagate." } }
+      ]
+    },
+    {
+      "id": "sender_info",
+      "type": "info",
+      "message": "{{sender_note}}"
+    },
+    {
+      "id": "confirm_sender",
+      "type": "prompt_confirm",
+      "message": "Sender identity verified (or verification in progress for domain auth)?"
+    },
+    {
+      "id": "create_key_nav",
+      "type": "open_url",
+      "url": "https://app.sendgrid.com/settings/api_keys",
+      "message": "Opening the API Keys page."
+    },
+    {
+      "id": "create_key",
+      "type": "info",
+      "message": "Click 'Create API Key'. Give it a descriptive name. For permissions, 'Full Access' works for development, but 'Restricted Access' is recommended for production (grant only 'Mail Send' if you just need to send emails)."
+    },
+    {
+      "id": "confirm_key_created",
+      "type": "prompt_confirm",
+      "message": "API key created? It should be displayed on screen now."
+    },
+    {
+      "id": "collect_key",
+      "type": "prompt_input",
+      "output_key": "SENDGRID_API_KEY",
+      "message": "Copy your API key and paste it here (starts with SG.):",
+      "validation": "^SG\\.[a-zA-Z0-9_-]{20,}\\.[a-zA-Z0-9_-]{20,}$",
+      "validation_error": "That doesn't look like a valid SendGrid API key. It should start with 'SG.' followed by two dot-separated segments."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_key"],
+      "message": "Checking your API key works...",
+      "on_success": "API key verified. SendGrid is ready to send emails.",
+      "on_failure": "Couldn't verify the API key. Make sure you copied it correctly and it has the necessary permissions.",
+      "config": {
+        "url": "https://api.sendgrid.com/v3/user/profile",
+        "api_key_field": "SENDGRID_API_KEY"
+      }
+    }
+  ],
+  "gotchas": [
+    "SendGrid API keys are shown only once when created. If you lose it, you'll need to create a new one.",
+    "The free tier allows 100 emails per day. Paid plans start at 40,000 emails per month.",
+    "You MUST have a verified sender identity before sending any emails, or API calls will fail with a 403 error.",
+    "If using Single Sender Verification, emails can only be sent from that exact address. Domain auth allows any address on the domain.",
+    "SendGrid may suspend new accounts that send too many emails too quickly. Start with small volumes and ramp up gradually."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

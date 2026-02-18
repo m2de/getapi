@@ -1,0 +1,99 @@
+{
+  "schema_version": "1",
+  "id": "clerk",
+  "display_name": "Clerk",
+  "description": "Set up API access for Clerk, a user authentication and management platform with pre-built UI components and a powerful API.",
+  "category": ["auth", "identity"],
+  "website": "https://dashboard.clerk.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Clerk account"
+  ],
+  "outputs": [
+    {
+      "key": "CLERK_PUBLISHABLE_KEY",
+      "description": "Publishable key for client-side usage (safe to expose in frontend code)",
+      "sensitive": false
+    },
+    {
+      "key": "CLERK_SECRET_KEY",
+      "description": "Secret key for server-side API calls",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Clerk API keys. Clerk provides two keys: a publishable key (safe for client-side) and a secret key (server-side only)."
+    },
+    {
+      "id": "open_dashboard",
+      "type": "open_url",
+      "url": "https://dashboard.clerk.com",
+      "message": "Opening the Clerk dashboard. Sign in if prompted."
+    },
+    {
+      "id": "check_app",
+      "type": "prompt_choice",
+      "message": "Do you have a Clerk application already?",
+      "choices": [
+        { "label": "Yes, use an existing application", "next": "navigate_keys" },
+        { "label": "No, I need to create one", "next": "create_app" }
+      ]
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Click 'Create application'. Give it a name and select the sign-in methods you want to support (e.g. email, Google, GitHub)."
+    },
+    {
+      "id": "confirm_app",
+      "type": "prompt_confirm",
+      "message": "Application created?"
+    },
+    {
+      "id": "navigate_keys",
+      "type": "info",
+      "message": "Navigate to your application, then go to 'API Keys' in the sidebar."
+    },
+    {
+      "id": "collect_publishable_key",
+      "type": "prompt_input",
+      "output_key": "CLERK_PUBLISHABLE_KEY",
+      "message": "Copy the 'Publishable key' and paste it here:",
+      "validation": "^pk_(test|live)_[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look like a valid Clerk publishable key. It should start with 'pk_test_' or 'pk_live_' followed by a long string."
+    },
+    {
+      "id": "collect_secret_key",
+      "type": "prompt_input",
+      "output_key": "CLERK_SECRET_KEY",
+      "message": "Now copy the 'Secret key' and paste it here:",
+      "validation": "^sk_(test|live)_[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look like a valid Clerk secret key. It should start with 'sk_test_' or 'sk_live_' followed by a long string."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_secret_key"],
+      "message": "Checking your secret key works...",
+      "on_success": "Secret key verified. You're all set.",
+      "on_failure": "Couldn't verify the secret key. Make sure you copied it correctly.",
+      "config": {
+        "url": "https://api.clerk.com/v1/users?limit=1",
+        "api_key_field": "CLERK_SECRET_KEY"
+      }
+    }
+  ],
+  "gotchas": [
+    "The publishable key is safe for client-side code. The secret key must NEVER be exposed in frontend code.",
+    "Keys starting with 'pk_test_' / 'sk_test_' are for development. Switch to 'pk_live_' / 'sk_live_' for production.",
+    "Clerk's free plan includes up to 10,000 monthly active users.",
+    "If you rotate your secret key, all existing server-side integrations will break immediately."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

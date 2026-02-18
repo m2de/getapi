@@ -1,0 +1,73 @@
+{
+  "schema_version": "1",
+  "id": "cloudflare",
+  "display_name": "Cloudflare API",
+  "description": "Set up API access for Cloudflare, enabling management of DNS, CDN, Workers, and security settings programmatically.",
+  "category": ["cdn", "edge", "dns"],
+  "website": "https://dash.cloudflare.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Cloudflare account"
+  ],
+  "outputs": [
+    {
+      "key": "CLOUDFLARE_API_TOKEN",
+      "description": "Scoped API token for Cloudflare API access",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a scoped Cloudflare API token. Cloudflare recommends API tokens over the legacy Global API Key because tokens can be scoped to specific permissions and zones."
+    },
+    {
+      "id": "open_tokens",
+      "type": "open_url",
+      "url": "https://dash.cloudflare.com/profile/api-tokens",
+      "message": "Opening the Cloudflare API tokens page. Sign in if prompted."
+    },
+    {
+      "id": "create_token",
+      "type": "info",
+      "message": "Click 'Create Token'. You can use a template (e.g. 'Edit zone DNS', 'Read All Resources') or click 'Create Custom Token' for fine-grained control. Select the permissions and zones your app needs."
+    },
+    {
+      "id": "confirm_token",
+      "type": "prompt_confirm",
+      "message": "Token created? (You should see a summary page with the token value.)"
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "CLOUDFLARE_API_TOKEN",
+      "message": "Copy the API token and paste it here:",
+      "validation": "^[a-zA-Z0-9_-]{40}$",
+      "validation_error": "That doesn't look like a valid Cloudflare API token. It should be a 40-character string of letters, numbers, hyphens, and underscores."
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token"],
+      "message": "Checking your API token works...",
+      "on_success": "API token verified. You're all set.",
+      "on_failure": "Couldn't verify the API token. Make sure you copied it correctly and it hasn't been revoked.",
+      "config": {
+        "url": "https://api.cloudflare.com/client/v4/user/tokens/verify",
+        "api_key_field": "CLOUDFLARE_API_TOKEN"
+      }
+    }
+  ],
+  "gotchas": [
+    "API tokens are only shown once when created. If you lose it, you'll need to create a new one.",
+    "Always use scoped API tokens instead of the Global API Key. Tokens can be limited to specific zones and permissions.",
+    "Cloudflare's free plan includes CDN, DNS, DDoS protection, and basic WAF rules.",
+    "The API has a rate limit of 1,200 requests per 5 minutes. Batch operations where possible.",
+    "Token permissions are additive — start with minimal permissions and add more as needed."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

@@ -1,0 +1,26 @@
+# Build output
+/target
+
+# Environment and secrets
+.env
+.env.*
+
+# Session data
+.getapi/
+
+# macOS
+.DS_Store
+
+# Editor files
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# Claude Code
+.claude/
+
+# npm platform binary artefacts
+npm/*/bin/getapi
+npm/*/bin/getapi.exe

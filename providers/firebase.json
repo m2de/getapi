@@ -1,0 +1,116 @@
+{
+  "schema_version": "1",
+  "id": "firebase",
+  "display_name": "Firebase",
+  "description": "Set up Firebase for your project, including the project ID and Web API Key for client-side SDKs, plus guidance on service account setup for server-side usage.",
+  "category": ["database", "backend", "auth"],
+  "website": "https://console.firebase.google.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Google account"
+  ],
+  "outputs": [
+    {
+      "key": "FIREBASE_PROJECT_ID",
+      "description": "Firebase project ID",
+      "sensitive": false
+    },
+    {
+      "key": "FIREBASE_WEB_API_KEY",
+      "description": "Web API Key for client-side Firebase SDKs",
+      "sensitive": false
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Firebase project ID and Web API Key. If you need server-side Admin SDK access, we'll also guide you through downloading a service account key."
+    },
+    {
+      "id": "open_console",
+      "type": "open_url",
+      "url": "https://console.firebase.google.com",
+      "message": "Opening the Firebase console. Sign in with your Google account if prompted."
+    },
+    {
+      "id": "check_project",
+      "type": "prompt_choice",
+      "message": "Do you have a Firebase project already?",
+      "choices": [
+        { "label": "Yes, use an existing project", "next": "select_project" },
+        { "label": "No, I need to create one", "next": "create_project" }
+      ]
+    },
+    {
+      "id": "create_project",
+      "type": "info",
+      "message": "Click 'Create a project' (or 'Add project'). Give it a name, optionally enable Google Analytics, and wait for provisioning to complete."
+    },
+    {
+      "id": "confirm_project",
+      "type": "prompt_confirm",
+      "message": "Project created?"
+    },
+    {
+      "id": "select_project",
+      "type": "info",
+      "message": "Click on your project to open it, then click the gear icon next to 'Project Overview' and select 'Project settings'."
+    },
+    {
+      "id": "collect_project_id",
+      "type": "prompt_input",
+      "output_key": "FIREBASE_PROJECT_ID",
+      "message": "Under the 'General' tab, find the 'Project ID' and paste it here:",
+      "validation": "^[a-z0-9][a-z0-9-]{4,28}[a-z0-9]$",
+      "validation_error": "That doesn't look like a valid Firebase project ID. It should be lowercase letters, numbers, and hyphens (6-30 characters)."
+    },
+    {
+      "id": "check_web_app",
+      "type": "info",
+      "message": "Scroll down to 'Your apps'. If you don't see a web app (</> icon), click 'Add app' and select the web platform (</>) to register one."
+    },
+    {
+      "id": "collect_api_key",
+      "type": "prompt_input",
+      "output_key": "FIREBASE_WEB_API_KEY",
+      "message": "In your web app's Firebase config snippet, find the 'apiKey' value and paste it here:",
+      "validation": "^AIza[a-zA-Z0-9_-]{35}$",
+      "validation_error": "That doesn't look like a valid Firebase Web API Key. It should start with 'AIza' followed by 35 characters."
+    },
+    {
+      "id": "service_account_choice",
+      "type": "prompt_choice",
+      "message": "Do you need a service account key for server-side Admin SDK usage?",
+      "choices": [
+        { "label": "Yes, guide me through it", "next": "service_account_guide" },
+        { "label": "No, I only need client-side access", "next": "done" }
+      ]
+    },
+    {
+      "id": "service_account_guide",
+      "type": "info",
+      "message": "In Project Settings, click the 'Service accounts' tab, then click 'Generate new private key'. This downloads a JSON file. Save it as 'service-account.json' in your project root and add it to your .gitignore immediately — this file must NEVER be committed to git."
+    },
+    {
+      "id": "confirm_service_account",
+      "type": "prompt_confirm",
+      "message": "Service account key downloaded and added to .gitignore?"
+    },
+    {
+      "id": "done",
+      "type": "info",
+      "message": "Setup complete. The Web API Key and Project ID are not secret — they identify your project but don't grant access without proper Firebase Security Rules."
+    }
+  ],
+  "gotchas": [
+    "The Web API Key is NOT secret. It's meant to be included in client-side code. Access is controlled by Firebase Security Rules and App Check.",
+    "Service account JSON files grant full admin access. NEVER commit them to git. Add 'service-account.json' to .gitignore.",
+    "The free Spark plan has generous limits: 1 GiB Firestore storage, 10 GiB/month bandwidth, 50K daily reads.",
+    "Firebase project IDs are globally unique and cannot be changed after creation.",
+    "Enable App Check in production to prevent unauthorized access to your backend resources."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

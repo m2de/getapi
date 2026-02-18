@@ -1,0 +1,28 @@
+{
+  "name": "getapi-cli",
+  "version": "0.1.0",
+  "description": "Guided, interactive walkthroughs for setting up developer API credentials",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2de/getapi"
+  },
+  "homepage": "https://github.com/m2de/getapi",
+  "bin": {
+    "getapi": "bin/getapi.js"
+  },
+  "keywords": [
+    "cli",
+    "api",
+    "credentials",
+    "setup",
+    "developer-tools"
+  ],
+  "optionalDependencies": {
+    "getapi-cli-darwin-arm64": "0.1.0",
+    "getapi-cli-darwin-x64": "0.1.0",
+    "getapi-cli-linux-x64": "0.1.0",
+    "getapi-cli-linux-arm64": "0.1.0",
+    "getapi-cli-win32-x64": "0.1.0"
+  }
+}

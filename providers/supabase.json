@@ -1,0 +1,113 @@
+{
+  "schema_version": "1",
+  "id": "supabase",
+  "display_name": "Supabase",
+  "description": "Set up API access for Supabase, an open-source Firebase alternative providing a Postgres database, authentication, storage, and real-time subscriptions.",
+  "category": ["database", "backend", "auth"],
+  "website": "https://supabase.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Supabase account",
+    "A Supabase project (or you'll create one during setup)"
+  ],
+  "outputs": [
+    {
+      "key": "SUPABASE_URL",
+      "description": "Project URL (e.g., https://xxxx.supabase.co)",
+      "sensitive": false
+    },
+    {
+      "key": "SUPABASE_ANON_KEY",
+      "description": "Anonymous (public) API key for client-side access with Row Level Security",
+      "sensitive": false
+    },
+    {
+      "key": "SUPABASE_SERVICE_ROLE_KEY",
+      "description": "Service role key that bypasses Row Level Security (server-side only)",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Supabase project URL and API keys. Supabase provides two keys: an anonymous key (safe for client-side use with Row Level Security) and a service role key (server-side only, bypasses RLS)."
+    },
+    {
+      "id": "open_dashboard",
+      "type": "open_url",
+      "url": "https://supabase.com/dashboard/projects",
+      "message": "Opening the Supabase dashboard. Sign in if prompted."
+    },
+    {
+      "id": "check_project",
+      "type": "prompt_choice",
+      "message": "Do you have a Supabase project already?",
+      "choices": [
+        { "label": "Yes, use an existing project", "next": "select_project" },
+        { "label": "No, I need to create one", "next": "create_project" }
+      ]
+    },
+    {
+      "id": "create_project",
+      "type": "info",
+      "message": "Click 'New Project'. Choose an organization (or create one), give the project a name, set a strong database password (save this somewhere safe), and select a region close to your users."
+    },
+    {
+      "id": "wait_project",
+      "type": "prompt_confirm",
+      "message": "Project created? It may take a minute or two to finish provisioning."
+    },
+    {
+      "id": "select_project",
+      "type": "info",
+      "message": "Click on your project to open it."
+    },
+    {
+      "id": "navigate_settings",
+      "type": "open_url",
+      "url": "https://supabase.com/dashboard/project/_/settings/api",
+      "message": "Opening the API settings page. If this doesn't open the right project, navigate to Settings > API in your project's sidebar."
+    },
+    {
+      "id": "collect_url",
+      "type": "prompt_input",
+      "output_key": "SUPABASE_URL",
+      "message": "Under 'Project URL', copy the URL and paste it here:",
+      "validation": "^https://[a-z0-9]{8,}\\.supabase\\.co$",
+      "validation_error": "That doesn't look like a valid Supabase project URL. It should be like 'https://xxxxxxxxxxxx.supabase.co'."
+    },
+    {
+      "id": "collect_anon_key",
+      "type": "prompt_input",
+      "output_key": "SUPABASE_ANON_KEY",
+      "message": "Under 'Project API keys', copy the 'anon public' key and paste it here:",
+      "validation": "^eyJ[a-zA-Z0-9_-]{100,}$",
+      "validation_error": "That doesn't look like a valid Supabase anon key. It should be a long JWT starting with 'eyJ'."
+    },
+    {
+      "id": "collect_service_key",
+      "type": "prompt_input",
+      "output_key": "SUPABASE_SERVICE_ROLE_KEY",
+      "message": "Now click 'Reveal' next to the 'service_role secret' key and paste it here:",
+      "validation": "^eyJ[a-zA-Z0-9_-]{100,}$",
+      "validation_error": "That doesn't look like a valid Supabase service role key. It should be a long JWT starting with 'eyJ'."
+    },
+    {
+      "id": "rls_warning",
+      "type": "info",
+      "message": "Setup complete. Since the project URL and keys are project-specific, automated validation is skipped. You can test connectivity by making a request to your project's REST API."
+    }
+  ],
+  "gotchas": [
+    "The service_role key bypasses Row Level Security. NEVER expose it in client-side code or public repositories.",
+    "The anon key is meant to be public, but it only works if you have proper Row Level Security (RLS) policies on your tables.",
+    "If RLS is not enabled on a table, the anon key gives full read/write access to that table. Always enable RLS.",
+    "Free tier projects are paused after 7 days of inactivity. Upgrade to Pro or ping the project periodically to keep it active.",
+    "The database password set during project creation is separate from the API keys. You need it for direct Postgres connections.",
+    "Supabase project URLs and keys do not change unless you explicitly regenerate them in the dashboard."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

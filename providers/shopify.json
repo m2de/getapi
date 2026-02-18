@@ -1,0 +1,104 @@
+{
+  "schema_version": "1",
+  "id": "shopify",
+  "display_name": "Shopify Admin API",
+  "description": "Set up API access for the Shopify Admin API, enabling management of products, orders, customers, and store settings programmatically.",
+  "category": ["ecommerce", "payments"],
+  "website": "https://admin.shopify.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "10 minutes",
+  "prerequisites": [
+    "A Shopify store (live or development store)",
+    "Store owner or staff account with 'Develop apps' permission"
+  ],
+  "outputs": [
+    {
+      "key": "SHOPIFY_STORE_URL",
+      "description": "Your Shopify store's myshopify.com domain (e.g., my-store.myshopify.com)",
+      "sensitive": false
+    },
+    {
+      "key": "SHOPIFY_ACCESS_TOKEN",
+      "description": "Admin API access token for authenticating requests",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a custom app in your Shopify store and get an Admin API access token. This token lets you manage products, orders, customers, and more via the API."
+    },
+    {
+      "id": "collect_store_url",
+      "type": "prompt_input",
+      "output_key": "SHOPIFY_STORE_URL",
+      "message": "Enter your Shopify store's myshopify.com domain (e.g., my-store.myshopify.com):",
+      "validation": "^[a-z0-9][a-z0-9-]*\\.myshopify\\.com$",
+      "validation_error": "That doesn't look like a valid Shopify store URL. It should be like 'my-store.myshopify.com' (no https://)."
+    },
+    {
+      "id": "open_admin",
+      "type": "open_url",
+      "url": "https://admin.shopify.com",
+      "message": "Opening Shopify admin. Sign in and select your store if prompted."
+    },
+    {
+      "id": "enable_dev",
+      "type": "info",
+      "message": "Go to 'Settings' (bottom of the sidebar) > 'Apps and sales channels' > 'Develop apps'. If custom app development isn't enabled, click 'Allow custom app development'."
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Click 'Create an app'. Give it a descriptive name (e.g., your project name)."
+    },
+    {
+      "id": "configure_scopes",
+      "type": "info",
+      "message": "Click 'Configure Admin API scopes'. Select the access scopes your app needs (e.g., read_products, write_orders). Start with minimal scopes — you can add more later. Click 'Save'."
+    },
+    {
+      "id": "install_app",
+      "type": "info",
+      "message": "Click 'Install app' in the top right, then confirm the installation. This generates your API credentials."
+    },
+    {
+      "id": "confirm_install",
+      "type": "prompt_confirm",
+      "message": "App installed?"
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "SHOPIFY_ACCESS_TOKEN",
+      "message": "Copy the 'Admin API access token' (shown only once after install) and paste it here:",
+      "validation": "^shpat_[a-f0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Shopify access token. It should start with 'shpat_' followed by 32 hex characters."
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_store_url", "collect_token"],
+      "message": "Checking your access token works...",
+      "on_success": "Access token verified. Your Shopify Admin API is ready.",
+      "on_failure": "Couldn't verify the access token. Make sure the token is correct and the app is installed.",
+      "config": {
+        "url": "https://{{SHOPIFY_STORE_URL}}/admin/api/2024-01/shop.json",
+        "header_name": "X-Shopify-Access-Token",
+        "header_value": "{{SHOPIFY_ACCESS_TOKEN}}"
+      }
+    }
+  ],
+  "gotchas": [
+    "The Admin API access token is shown ONLY ONCE after installing the app. If you lose it, you must uninstall and reinstall the app.",
+    "Always use the minimum required scopes. Overly broad access increases security risk.",
+    "Shopify has API rate limits: 2 requests/second for REST and 50 points/second for GraphQL.",
+    "Use the GraphQL Admin API for new projects — it's more efficient and is Shopify's recommended approach.",
+    "Development stores are free but have limitations. Create one at partners.shopify.com for testing.",
+    "The API version in the URL (e.g., 2024-01) determines available features. Shopify deprecates old versions quarterly."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

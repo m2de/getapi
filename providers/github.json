@@ -1,0 +1,110 @@
+{
+  "schema_version": "1",
+  "id": "github",
+  "display_name": "GitHub API",
+  "description": "Set up a personal access token for the GitHub API.",
+  "category": ["developer-tools", "git"],
+  "website": "https://github.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "3 minutes",
+  "prerequisites": [
+    "A GitHub account"
+  ],
+  "outputs": [
+    {
+      "key": "GITHUB_TOKEN",
+      "description": "Personal access token (fine-grained or classic)",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a GitHub personal access token. GitHub recommends fine-grained tokens for new projects, but classic tokens are simpler."
+    },
+    {
+      "id": "token_type",
+      "type": "prompt_choice",
+      "message": "Which type of token do you want?",
+      "choices": [
+        { "label": "Fine-grained (recommended)", "next": "open_fine_grained", "sets": { "token_note": "Select the repository access and permissions your project needs." } },
+        { "label": "Classic", "next": "open_classic", "sets": { "token_note": "Select the scopes your project needs (repo, read:user, etc.)." } }
+      ]
+    },
+    {
+      "id": "open_fine_grained",
+      "type": "open_url",
+      "url": "https://github.com/settings/personal-access-tokens/new",
+      "message": "Opening the fine-grained token creation page."
+    },
+    {
+      "id": "fine_grained_info",
+      "type": "info",
+      "message": "Give the token a descriptive name and set an expiration. {{token_note}}"
+    },
+    {
+      "id": "collect_token_fg",
+      "type": "prompt_input",
+      "output_key": "GITHUB_TOKEN",
+      "message": "Copy your new token and paste it here:",
+      "validation": "^(ghp_|github_pat_)[a-zA-Z0-9_]{20,}$",
+      "validation_error": "That doesn't look like a GitHub token. Fine-grained tokens start with 'github_pat_', classic tokens start with 'ghp_'."
+    },
+    {
+      "id": "validate_fg",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token_fg"],
+      "message": "Checking your token works...",
+      "on_success": "Token verified. You're all set.",
+      "on_failure": "Couldn't verify the token. Make sure it hasn't expired and has the necessary permissions.",
+      "config": {
+        "url": "https://api.github.com/user",
+        "header_name": "Authorization",
+        "header_value": "Bearer {{GITHUB_TOKEN}}"
+      }
+    },
+    {
+      "id": "open_classic",
+      "type": "open_url",
+      "url": "https://github.com/settings/tokens/new",
+      "message": "Opening the classic token creation page."
+    },
+    {
+      "id": "classic_info",
+      "type": "info",
+      "message": "Give the token a descriptive name and set an expiration. {{token_note}}"
+    },
+    {
+      "id": "collect_token_classic",
+      "type": "prompt_input",
+      "output_key": "GITHUB_TOKEN",
+      "message": "Copy your new token and paste it here:",
+      "validation": "^(ghp_|github_pat_)[a-zA-Z0-9_]{20,}$",
+      "validation_error": "That doesn't look like a GitHub token. Classic tokens start with 'ghp_'."
+    },
+    {
+      "id": "validate_classic",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token_classic"],
+      "message": "Checking your token works...",
+      "on_success": "Token verified. You're all set.",
+      "on_failure": "Couldn't verify the token. Make sure it hasn't expired and has the necessary permissions.",
+      "config": {
+        "url": "https://api.github.com/user",
+        "header_name": "Authorization",
+        "header_value": "Bearer {{GITHUB_TOKEN}}"
+      }
+    }
+  ],
+  "gotchas": [
+    "Tokens are only shown once when created. Store them immediately.",
+    "Fine-grained tokens can be scoped to specific repositories — classic tokens apply to your entire account.",
+    "Set an expiration date. Tokens without expiry are a security risk.",
+    "For GitHub Actions, use repository secrets instead of personal access tokens."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

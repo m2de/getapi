@@ -1,0 +1,105 @@
+{
+  "schema_version": "1",
+  "id": "auth0",
+  "display_name": "Auth0",
+  "description": "Set up Auth0 for authentication and identity management. Get your domain, client ID, and client secret for integrating Auth0 into your application.",
+  "category": ["auth", "identity"],
+  "website": "https://manage.auth0.com",
+  "auth_types": ["oauth2"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "An Auth0 account"
+  ],
+  "outputs": [
+    {
+      "key": "AUTH0_DOMAIN",
+      "description": "Auth0 tenant domain (e.g., your-tenant.auth0.com)",
+      "sensitive": false
+    },
+    {
+      "key": "AUTH0_CLIENT_ID",
+      "description": "Application Client ID",
+      "sensitive": false
+    },
+    {
+      "key": "AUTH0_CLIENT_SECRET",
+      "description": "Application Client Secret for server-side usage",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get your Auth0 domain, Client ID, and Client Secret. You'll need an Auth0 application — we'll create one if you don't have one already."
+    },
+    {
+      "id": "open_dashboard",
+      "type": "open_url",
+      "url": "https://manage.auth0.com/dashboard",
+      "message": "Opening the Auth0 dashboard. Sign in if prompted."
+    },
+    {
+      "id": "check_app",
+      "type": "prompt_choice",
+      "message": "Do you have an Auth0 application already?",
+      "choices": [
+        { "label": "Yes, use an existing application", "next": "navigate_app" },
+        { "label": "No, I need to create one", "next": "create_app" }
+      ]
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Go to 'Applications' > 'Applications' in the sidebar, then click 'Create Application'. Give it a name and select the application type that matches your project (e.g. 'Regular Web Application', 'Single Page Application', or 'Native')."
+    },
+    {
+      "id": "confirm_app",
+      "type": "prompt_confirm",
+      "message": "Application created?"
+    },
+    {
+      "id": "navigate_app",
+      "type": "info",
+      "message": "Go to 'Applications' > 'Applications' in the sidebar and click on your application to open its settings."
+    },
+    {
+      "id": "collect_domain",
+      "type": "prompt_input",
+      "output_key": "AUTH0_DOMAIN",
+      "message": "Copy the 'Domain' value and paste it here (e.g., your-tenant.auth0.com):",
+      "validation": "^[a-zA-Z0-9-]+\\.auth0\\.com$",
+      "validation_error": "That doesn't look like a valid Auth0 domain. It should be like 'your-tenant.auth0.com'."
+    },
+    {
+      "id": "collect_client_id",
+      "type": "prompt_input",
+      "output_key": "AUTH0_CLIENT_ID",
+      "message": "Copy the 'Client ID' and paste it here:",
+      "validation": "^[a-zA-Z0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Auth0 Client ID. It should be a 32-character alphanumeric string."
+    },
+    {
+      "id": "collect_client_secret",
+      "type": "prompt_input",
+      "output_key": "AUTH0_CLIENT_SECRET",
+      "message": "Copy the 'Client Secret' and paste it here:",
+      "validation": "^[a-zA-Z0-9_-]{32,64}$",
+      "validation_error": "That doesn't look like a valid Auth0 Client Secret. It should be 32-64 characters (alphanumeric, hyphens, underscores)."
+    },
+    {
+      "id": "done",
+      "type": "info",
+      "message": "Setup complete. Automated validation is skipped because Auth0's client credentials flow requires an 'audience' parameter specific to your API. Test by initiating a login flow in your application."
+    }
+  ],
+  "gotchas": [
+    "The Client Secret must NEVER be exposed in client-side code. Use it only on the server side.",
+    "Auth0's free plan includes up to 25,000 monthly active users and unlimited social connections.",
+    "Make sure to configure your 'Allowed Callback URLs', 'Allowed Logout URLs', and 'Allowed Web Origins' in the application settings.",
+    "Auth0 domains can be regional (e.g., your-tenant.us.auth0.com). Use the exact domain shown in your dashboard.",
+    "Automated validation is not performed because Auth0's client credentials flow requires an 'audience' parameter. Verify by testing a login flow."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

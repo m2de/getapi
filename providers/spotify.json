@@ -1,0 +1,93 @@
+{
+  "schema_version": "1",
+  "id": "spotify",
+  "display_name": "Spotify API",
+  "description": "Set up API access for Spotify, enabling search, playback control, playlist management, and access to music metadata.",
+  "category": ["music", "entertainment"],
+  "website": "https://developer.spotify.com",
+  "auth_types": ["oauth2"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Spotify account (free or premium)"
+  ],
+  "outputs": [
+    {
+      "key": "SPOTIFY_CLIENT_ID",
+      "description": "Client ID for your Spotify application",
+      "sensitive": false
+    },
+    {
+      "key": "SPOTIFY_CLIENT_SECRET",
+      "description": "Client Secret for server-side authentication",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a Spotify developer app and get your Client ID and Secret. These are used for the Client Credentials flow (server-to-server) or as part of the Authorization Code flow (user-facing)."
+    },
+    {
+      "id": "open_dashboard",
+      "type": "open_url",
+      "url": "https://developer.spotify.com/dashboard",
+      "message": "Opening the Spotify developer dashboard. Sign in with your Spotify account if prompted."
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Click 'Create app'. Fill in the app name and description. For 'Redirect URI', enter 'http://localhost:3000/callback' (you can change this later). Check the 'Web API' checkbox under 'Which API/SDKs are you planning to use?'."
+    },
+    {
+      "id": "confirm_app",
+      "type": "prompt_confirm",
+      "message": "App created?"
+    },
+    {
+      "id": "navigate_settings",
+      "type": "info",
+      "message": "Click on your app, then go to 'Settings' to find your credentials."
+    },
+    {
+      "id": "collect_client_id",
+      "type": "prompt_input",
+      "output_key": "SPOTIFY_CLIENT_ID",
+      "message": "Copy the 'Client ID' and paste it here:",
+      "validation": "^[a-f0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Spotify Client ID. It should be a 32-character hexadecimal string."
+    },
+    {
+      "id": "collect_client_secret",
+      "type": "prompt_input",
+      "output_key": "SPOTIFY_CLIENT_SECRET",
+      "message": "Click 'View client secret', then copy and paste it here:",
+      "validation": "^[a-f0-9]{32}$",
+      "validation_error": "That doesn't look like a valid Spotify Client Secret. It should be a 32-character hexadecimal string."
+    },
+    {
+      "id": "validate_creds",
+      "type": "validate",
+      "method": "oauth2_client_credentials",
+      "depends_on": ["collect_client_id", "collect_client_secret"],
+      "message": "Checking your credentials work...",
+      "on_success": "Credentials verified. Your Spotify app is ready.",
+      "on_failure": "Couldn't authenticate with those credentials. Double-check them on the developer dashboard.",
+      "config": {
+        "token_url": "https://accounts.spotify.com/api/token",
+        "client_id_field": "SPOTIFY_CLIENT_ID",
+        "client_secret_field": "SPOTIFY_CLIENT_SECRET",
+        "auth_method": "basic"
+      }
+    }
+  ],
+  "gotchas": [
+    "The Client Secret must NEVER be exposed in client-side code. Use the Authorization Code flow with PKCE for frontend apps.",
+    "Spotify's free tier has no hard rate limit, but aggressive usage may trigger 429 errors. Back off and retry.",
+    "Apps start in 'development mode' with a 25-user limit. Submit a quota extension request for production use.",
+    "Some endpoints (e.g. playback control) require Spotify Premium on the user's account.",
+    "Redirect URIs must be registered in your app settings before they can be used in the OAuth flow."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

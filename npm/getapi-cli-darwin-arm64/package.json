@@ -1,0 +1,13 @@
+{
+  "name": "getapi-cli-darwin-arm64",
+  "version": "0.1.0",
+  "description": "getapi platform binary for macOS Apple Silicon",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2de/getapi"
+  },
+  "os": ["darwin"],
+  "cpu": ["arm64"],
+  "preferUnpacked": true
+}

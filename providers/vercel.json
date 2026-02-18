@@ -1,0 +1,67 @@
+{
+  "schema_version": "1",
+  "id": "vercel",
+  "display_name": "Vercel API",
+  "description": "Set up API access for Vercel, a platform for deploying and hosting web applications with automatic CI/CD.",
+  "category": ["deployment", "hosting"],
+  "website": "https://vercel.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "3 minutes",
+  "prerequisites": [
+    "A Vercel account"
+  ],
+  "outputs": [
+    {
+      "key": "VERCEL_TOKEN",
+      "description": "Personal access token for the Vercel API",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a Vercel personal access token for API access. This token can manage deployments, projects, and team settings."
+    },
+    {
+      "id": "open_tokens",
+      "type": "open_url",
+      "url": "https://vercel.com/account/tokens",
+      "message": "Opening the Vercel tokens page. Sign in if prompted."
+    },
+    {
+      "id": "create_token",
+      "type": "info",
+      "message": "Click 'Create Token'. Give it a descriptive name (e.g. your project name). Choose an appropriate scope and expiration."
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "VERCEL_TOKEN",
+      "message": "Copy the token and paste it here:",
+      "validation": "^[a-zA-Z0-9]{24}$",
+      "validation_error": "That doesn't look like a valid Vercel token. It should be a 24-character alphanumeric string."
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token"],
+      "message": "Checking your token works...",
+      "on_success": "Token verified. You're all set.",
+      "on_failure": "Couldn't verify the token. Make sure you copied it correctly and it hasn't expired.",
+      "config": {
+        "url": "https://api.vercel.com/v2/user",
+        "api_key_field": "VERCEL_TOKEN"
+      }
+    }
+  ],
+  "gotchas": [
+    "Tokens are only shown once when created. If you lose it, you'll need to create a new one.",
+    "Tokens inherit your account permissions. Use scoped tokens for CI/CD pipelines.",
+    "Set an expiration date on tokens — avoid creating tokens that never expire.",
+    "For team projects, make sure the token has access to the correct team scope."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

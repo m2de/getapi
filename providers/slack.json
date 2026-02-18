@@ -1,0 +1,127 @@
+{
+  "schema_version": "1",
+  "id": "slack",
+  "display_name": "Slack API",
+  "description": "Set up a Slack bot with API access for posting messages, reading channels, and responding to events.",
+  "category": ["messaging", "productivity"],
+  "website": "https://api.slack.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "10 minutes",
+  "prerequisites": [
+    "A Slack workspace where you have permission to install apps",
+    "Admin or app-installation permissions in that workspace"
+  ],
+  "outputs": [
+    {
+      "key": "SLACK_BOT_TOKEN",
+      "description": "Bot User OAuth Token (starts with xoxb-)",
+      "sensitive": true
+    },
+    {
+      "key": "SLACK_SIGNING_SECRET",
+      "description": "Signing secret for verifying requests from Slack",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll create a Slack app and get a bot token and signing secret. You'll need admin access (or permission to install apps) in your Slack workspace."
+    },
+    {
+      "id": "open_portal",
+      "type": "open_url",
+      "url": "https://api.slack.com/apps",
+      "message": "Opening the Slack app management page. Sign in with your Slack account if prompted."
+    },
+    {
+      "id": "check_existing",
+      "type": "prompt_choice",
+      "message": "Do you already have a Slack app you want to use, or do you need to create a new one?",
+      "choices": [
+        { "label": "Create a new app", "next": "create_app" },
+        { "label": "Use an existing app", "next": "select_existing" }
+      ]
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Click 'Create New App', then choose 'From scratch'. Give it a name and select the workspace you want to install it in."
+    },
+    {
+      "id": "confirm_app_created",
+      "type": "prompt_confirm",
+      "message": "App created? You should now be on the app's settings page."
+    },
+    {
+      "id": "select_existing",
+      "type": "info",
+      "message": "Click on your existing app to open its settings page."
+    },
+    {
+      "id": "setup_bot_scopes",
+      "type": "info",
+      "message": "In the left sidebar, go to 'OAuth & Permissions'. Scroll down to 'Scopes' and under 'Bot Token Scopes', add the permissions your bot needs. Common scopes: 'chat:write' (post messages), 'channels:read' (list channels), 'channels:history' (read messages)."
+    },
+    {
+      "id": "confirm_scopes",
+      "type": "prompt_confirm",
+      "message": "Bot scopes configured?"
+    },
+    {
+      "id": "install_app",
+      "type": "info",
+      "message": "Scroll to the top of the 'OAuth & Permissions' page and click 'Install to Workspace' (or 'Reinstall to Workspace' if updating). Authorize the app when prompted."
+    },
+    {
+      "id": "confirm_installed",
+      "type": "prompt_confirm",
+      "message": "App installed to your workspace?"
+    },
+    {
+      "id": "collect_bot_token",
+      "type": "prompt_input",
+      "output_key": "SLACK_BOT_TOKEN",
+      "message": "Copy the 'Bot User OAuth Token' (starts with xoxb-) and paste it here:",
+      "validation": "^xoxb-[0-9A-Za-z-]+$",
+      "validation_error": "That doesn't look like a valid Slack bot token. It should start with 'xoxb-'."
+    },
+    {
+      "id": "navigate_signing_secret",
+      "type": "info",
+      "message": "Now go to 'Basic Information' in the left sidebar. Under 'App Credentials', find the 'Signing Secret' and click 'Show'."
+    },
+    {
+      "id": "collect_signing_secret",
+      "type": "prompt_input",
+      "output_key": "SLACK_SIGNING_SECRET",
+      "message": "Paste your Signing Secret here:",
+      "validation": "^[a-f0-9]{20,}$",
+      "validation_error": "That doesn't look like a valid signing secret. It should be a hexadecimal string."
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_bot_token"],
+      "message": "Checking your bot token works...",
+      "on_success": "Bot token verified. Your Slack app is ready.",
+      "on_failure": "Couldn't verify the bot token. Make sure the app is installed and the token is correct.",
+      "config": {
+        "url": "https://slack.com/api/auth.test",
+        "header_name": "Authorization",
+        "header_value": "Bearer {{SLACK_BOT_TOKEN}}"
+      }
+    }
+  ],
+  "gotchas": [
+    "Bot tokens start with 'xoxb-'. User tokens start with 'xoxp-'. Make sure you're using the bot token.",
+    "The signing secret is used to verify that incoming requests actually come from Slack. You'll need it if you're handling events, slash commands, or interactive messages.",
+    "If you change scopes after installing, you must reinstall the app to the workspace for changes to take effect.",
+    "Bots can only access channels they've been invited to. Use '/invite @yourbot' in a channel to add it.",
+    "Slack's free tier limits message history to 90 days."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

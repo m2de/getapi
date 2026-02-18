@@ -1,0 +1,13 @@
+{
+  "name": "getapi-cli-linux-arm64",
+  "version": "0.1.0",
+  "description": "getapi platform binary for Linux ARM64",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/m2de/getapi"
+  },
+  "os": ["linux"],
+  "cpu": ["arm64"],
+  "preferUnpacked": true
+}

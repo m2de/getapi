@@ -1,0 +1,104 @@
+{
+  "schema_version": "1",
+  "id": "google-maps",
+  "display_name": "Google Maps API",
+  "description": "Set up API access for Google Maps, including geocoding, directions, places, and map rendering.",
+  "category": ["maps", "location"],
+  "website": "https://console.cloud.google.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Google Cloud account with billing enabled"
+  ],
+  "outputs": [
+    {
+      "key": "GOOGLE_MAPS_API_KEY",
+      "description": "API key for Google Maps Platform APIs",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll set up a Google Maps API key. You'll need a Google Cloud project with billing enabled — Google provides a $200/month free credit for Maps usage."
+    },
+    {
+      "id": "open_console",
+      "type": "open_url",
+      "url": "https://console.cloud.google.com/apis/dashboard",
+      "message": "Opening the Google Cloud API dashboard. Sign in if prompted."
+    },
+    {
+      "id": "check_project",
+      "type": "prompt_choice",
+      "message": "Do you have a Google Cloud project with billing enabled?",
+      "choices": [
+        { "label": "Yes, I have a project ready", "next": "enable_apis" },
+        { "label": "No, I need to create one", "next": "create_project" }
+      ]
+    },
+    {
+      "id": "create_project",
+      "type": "info",
+      "message": "Click the project dropdown at the top, then 'New Project'. Give it a name and create it. Then go to Billing in the sidebar and link a billing account (required for Maps APIs, but you get $200/month free)."
+    },
+    {
+      "id": "confirm_project",
+      "type": "prompt_confirm",
+      "message": "Project created with billing enabled?"
+    },
+    {
+      "id": "enable_apis",
+      "type": "open_url",
+      "url": "https://console.cloud.google.com/apis/library?filter=category:maps",
+      "message": "Opening the Maps API library. Enable the APIs you need (e.g. Maps JavaScript API, Geocoding API, Places API, Directions API)."
+    },
+    {
+      "id": "confirm_apis",
+      "type": "prompt_confirm",
+      "message": "Relevant Maps APIs enabled?"
+    },
+    {
+      "id": "create_credentials",
+      "type": "open_url",
+      "url": "https://console.cloud.google.com/apis/credentials",
+      "message": "Opening the Credentials page. Click 'Create credentials' > 'API key'."
+    },
+    {
+      "id": "restrict_key",
+      "type": "info",
+      "message": "After creating the key, click 'Edit API key' to add restrictions. For web apps, add HTTP referrer restrictions. For server apps, add IP restrictions. Under 'API restrictions', select only the Maps APIs you enabled."
+    },
+    {
+      "id": "collect_key",
+      "type": "prompt_input",
+      "output_key": "GOOGLE_MAPS_API_KEY",
+      "message": "Copy your API key and paste it here:",
+      "validation": "^AIza[a-zA-Z0-9_-]{35}$",
+      "validation_error": "That doesn't look like a valid Google Maps API key. It should start with 'AIza' followed by 35 characters."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_key"],
+      "message": "Checking your API key works...",
+      "on_success": "API key verified. Google Maps is ready to use.",
+      "on_failure": "Couldn't verify the API key. Make sure the Geocoding API is enabled and billing is set up.",
+      "config": {
+        "url": "https://maps.googleapis.com/maps/api/geocode/json?address=test&key={{GOOGLE_MAPS_API_KEY}}",
+        "api_key_field": "GOOGLE_MAPS_API_KEY"
+      }
+    }
+  ],
+  "gotchas": [
+    "Google Maps requires billing to be enabled, but you get $200/month in free usage (covers most development and small-scale production).",
+    "ALWAYS restrict your API key — unrestricted keys can be abused and run up charges on your billing account.",
+    "Different Maps APIs are billed separately. Check the pricing page for per-request costs.",
+    "API keys used in client-side JavaScript are visible in the browser. Use HTTP referrer restrictions to prevent abuse.",
+    "The $200/month free credit does NOT stack — unused credit does not roll over."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}

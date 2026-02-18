@@ -1,0 +1,135 @@
+{
+  "schema_version": "1",
+  "id": "twitter",
+  "display_name": "Twitter / X API",
+  "description": "Set up API access for posting and reading tweets.",
+  "category": ["social", "messaging"],
+  "website": "https://developer.x.com",
+  "auth_types": ["oauth2", "api_key"],
+  "estimated_time": "10 minutes (if account already verified)",
+  "prerequisites": [
+    "A Twitter/X account",
+    "A phone number verified on the account"
+  ],
+  "outputs": [
+    {
+      "key": "TWITTER_API_KEY",
+      "description": "API Key (Consumer Key)",
+      "sensitive": true
+    },
+    {
+      "key": "TWITTER_API_SECRET",
+      "description": "API Secret (Consumer Secret)",
+      "sensitive": true
+    },
+    {
+      "key": "TWITTER_BEARER_TOKEN",
+      "description": "Bearer Token for app-only auth",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll set up a Twitter/X developer account and create an app with API credentials. This usually takes about 10 minutes if your account is already verified."
+    },
+    {
+      "id": "open_portal",
+      "type": "open_url",
+      "url": "https://developer.x.com/en/portal/dashboard",
+      "message": "Opening the Twitter developer portal. Sign in with your Twitter account if prompted."
+    },
+    {
+      "id": "check_access",
+      "type": "prompt_choice",
+      "message": "What do you see?",
+      "choices": [
+        { "label": "The developer dashboard", "next": "create_project" },
+        { "label": "A sign-up or application page", "next": "apply_access" }
+      ]
+    },
+    {
+      "id": "apply_access",
+      "type": "wait",
+      "message": "Complete the developer account application. Free tier is usually approved instantly, but it can take up to 24 hours. Resume this setup once you have access.",
+      "resume_hint": "Check your email for approval confirmation, then run: getapi resume twitter"
+    },
+    {
+      "id": "create_project",
+      "type": "info",
+      "message": "Click 'Create Project'. Give it a name that describes your app. Select your use case when prompted."
+    },
+    {
+      "id": "confirm_project",
+      "type": "prompt_confirm",
+      "message": "Project created?"
+    },
+    {
+      "id": "scope_choice",
+      "type": "prompt_choice",
+      "message": "What do you need to do with the Twitter API?",
+      "choices": [
+        { "label": "Read tweets only", "sets": { "scope_note": "Free tier is fine. Select 'Read' permissions." } },
+        { "label": "Post tweets", "sets": { "scope_note": "Free tier supports posting. Select 'Read and Write' permissions." } },
+        { "label": "Read and post tweets", "sets": { "scope_note": "Select 'Read and Write' permissions." } },
+        { "label": "Full access including DMs", "sets": { "scope_note": "You'll need Basic tier ($100/mo). Select 'Read, Write, and Direct Messages'." } }
+      ]
+    },
+    {
+      "id": "apply_scopes",
+      "type": "info",
+      "message": "{{scope_note}}"
+    },
+    {
+      "id": "create_app",
+      "type": "info",
+      "message": "Now click 'Create App' within your project. Give it a name."
+    },
+    {
+      "id": "collect_api_key",
+      "type": "prompt_input",
+      "output_key": "TWITTER_API_KEY",
+      "message": "Copy your API Key (also called Consumer Key) and paste it here:",
+      "validation": "^[a-zA-Z0-9]{20,}$",
+      "validation_error": "That doesn't look like a valid Twitter API key. It should be a long alphanumeric string."
+    },
+    {
+      "id": "collect_api_secret",
+      "type": "prompt_input",
+      "output_key": "TWITTER_API_SECRET",
+      "message": "Now copy your API Secret (Consumer Secret):",
+      "validation": "^[a-zA-Z0-9]{20,}$"
+    },
+    {
+      "id": "collect_bearer_token",
+      "type": "prompt_input",
+      "output_key": "TWITTER_BEARER_TOKEN",
+      "message": "On the same page, copy the Bearer Token and paste it here:",
+      "validation": "^[A-Za-z0-9%]{50,}$",
+      "validation_error": "That doesn't look like a valid Bearer Token. It should be a long alphanumeric string (50+ characters)."
+    },
+    {
+      "id": "validate_creds",
+      "type": "validate",
+      "method": "oauth2_client_credentials",
+      "depends_on": ["collect_api_key", "collect_api_secret"],
+      "message": "Checking your credentials work...",
+      "on_success": "Credentials verified. Your keys are valid.",
+      "on_failure": "Couldn't authenticate with those credentials. Double-check them on the developer portal.",
+      "config": {
+        "token_url": "https://api.twitter.com/oauth2/token",
+        "client_id_field": "TWITTER_API_KEY",
+        "client_secret_field": "TWITTER_API_SECRET",
+        "auth_method": "basic"
+      }
+    }
+  ],
+  "gotchas": [
+    "Twitter's free tier only allows 1,500 tweets per month and 50 requests per 15 minutes.",
+    "The free tier does NOT include read access to tweets — only posting. You need Basic ($100/mo) for read access.",
+    "If your account was recently created, developer access might require additional verification."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-15"
+}

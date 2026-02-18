@@ -1,0 +1,67 @@
+{
+  "schema_version": "1",
+  "id": "resend",
+  "display_name": "Resend",
+  "description": "Set up API access for Resend, an email API for developers. Send transactional and marketing emails with a simple REST API.",
+  "category": ["email", "messaging"],
+  "website": "https://resend.com",
+  "auth_types": ["api_key"],
+  "estimated_time": "3 minutes",
+  "prerequisites": [
+    "A Resend account"
+  ],
+  "outputs": [
+    {
+      "key": "RESEND_API_KEY",
+      "description": "API key for authenticating requests",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get you a Resend API key. Resend's free tier includes 3,000 emails per month and 100 emails per day."
+    },
+    {
+      "id": "open_dashboard",
+      "type": "open_url",
+      "url": "https://resend.com/api-keys",
+      "message": "Opening the Resend API keys page. Sign in if prompted."
+    },
+    {
+      "id": "create_key",
+      "type": "info",
+      "message": "Click 'Create API Key'. Give it a descriptive name (e.g. your project name). Choose 'Full access' for permissions unless you only need sending."
+    },
+    {
+      "id": "collect_key",
+      "type": "prompt_input",
+      "output_key": "RESEND_API_KEY",
+      "message": "Copy the API key and paste it here (starts with re_):",
+      "validation": "^re_[a-zA-Z0-9_]{20,}$",
+      "validation_error": "That doesn't look like a valid Resend API key. It should start with 're_' followed by a long string."
+    },
+    {
+      "id": "validate_key",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_key"],
+      "message": "Checking your API key works...",
+      "on_success": "API key verified. You're all set.",
+      "on_failure": "Couldn't verify the API key. Make sure you copied it correctly.",
+      "config": {
+        "url": "https://api.resend.com/domains",
+        "api_key_field": "RESEND_API_KEY"
+      }
+    }
+  ],
+  "gotchas": [
+    "API keys are only shown once when created. If you lose it, you'll need to create a new one.",
+    "Free tier includes 3,000 emails/month and 100 emails/day.",
+    "You must verify a domain before sending from custom email addresses. You can use the onboarding@resend.dev sender for testing.",
+    "Resend uses API keys prefixed with 're_'. Don't confuse them with other services' keys."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-02-18"
+}
