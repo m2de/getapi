@@ -4,6 +4,8 @@
 
 **getapi** is a CLI that walks you through setting up API credentials for popular services. Instead of hunting through documentation, signup flows, and developer portals, getapi gives you step-by-step interactive guidance and writes the credentials to your project when you're done.
 
+**Documentation**: [m2de.github.io/getapi](https://m2de.github.io/getapi)
+
 ## Quick Start
 
 ```sh
@@ -21,6 +23,12 @@ getapi list
 ```
 
 ## Install
+
+### Homebrew
+
+```sh
+brew install m2de/tap/getapi
+```
 
 ### Cargo (from source)
 

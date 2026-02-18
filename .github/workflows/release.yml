@@ -1,0 +1,198 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: aarch64-apple-darwin
+            runner: macos-14
+            npm-pkg: getapi-cli-darwin-arm64
+            cross: false
+          - target: x86_64-apple-darwin
+            runner: macos-13
+            npm-pkg: getapi-cli-darwin-x64
+            cross: false
+          - target: x86_64-unknown-linux-gnu
+            runner: ubuntu-latest
+            npm-pkg: getapi-cli-linux-x64
+            cross: false
+          - target: aarch64-unknown-linux-gnu
+            runner: ubuntu-latest
+            npm-pkg: getapi-cli-linux-arm64
+            cross: true
+          - target: x86_64-pc-windows-msvc
+            runner: windows-latest
+            npm-pkg: getapi-cli-win32-x64
+            cross: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        if: ${{ !matrix.cross }}
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Install cross
+        if: ${{ matrix.cross }}
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build binary
+        run: ${{ matrix.cross && 'cross' || 'cargo' }} build --release --target ${{ matrix.target }}
+
+      - name: Prepare artifacts (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          BIN="target/${{ matrix.target }}/release/getapi"
+          chmod +x "$BIN"
+
+          # Raw binary for npm
+          mkdir -p npm-bin
+          cp "$BIN" npm-bin/getapi
+
+          # Archive for GitHub Release
+          ARCHIVE="getapi-${{ matrix.target }}.tar.gz"
+          tar czf "$ARCHIVE" -C "target/${{ matrix.target }}/release" getapi
+
+      - name: Prepare artifacts (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $BIN = "target/${{ matrix.target }}/release/getapi.exe"
+
+          # Raw binary for npm
+          New-Item -ItemType Directory -Force -Path npm-bin
+          Copy-Item $BIN npm-bin/getapi.exe
+
+          # Archive for GitHub Release
+          Compress-Archive -Path $BIN -DestinationPath "getapi-${{ matrix.target }}.zip"
+
+      - name: Upload binary artifact (npm)
+        uses: actions/upload-artifact@v4
+        with:
+          name: bin-${{ matrix.npm-pkg }}
+          path: npm-bin/
+
+      - name: Upload release archive
+        uses: actions/upload-artifact@v4
+        with:
+          name: archive-${{ matrix.target }}
+          path: getapi-${{ matrix.target }}.*
+
+  github-release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: archive-*
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: |
+            getapi-*.tar.gz
+            getapi-*.zip
+
+  publish-crates:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Download all binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bin-*
+          path: artifacts
+
+      - name: Stage binaries into platform packages
+        run: |
+          PLATFORMS=(
+            "getapi-cli-darwin-arm64"
+            "getapi-cli-darwin-x64"
+            "getapi-cli-linux-x64"
+            "getapi-cli-linux-arm64"
+            "getapi-cli-win32-x64"
+          )
+
+          for pkg in "${PLATFORMS[@]}"; do
+            mkdir -p "npm/${pkg}/bin"
+            cp artifacts/bin-${pkg}/* "npm/${pkg}/bin/"
+
+            # chmod +x on Unix binaries
+            if [[ "$pkg" != *"win32"* ]]; then
+              chmod +x "npm/${pkg}/bin/getapi"
+            fi
+          done
+
+      - name: Publish platform packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PLATFORMS=(
+            "getapi-cli-darwin-arm64"
+            "getapi-cli-darwin-x64"
+            "getapi-cli-linux-x64"
+            "getapi-cli-linux-arm64"
+            "getapi-cli-win32-x64"
+          )
+
+          for pkg in "${PLATFORMS[@]}"; do
+            echo "Publishing ${pkg}..."
+            cd "npm/${pkg}"
+            npm publish --access public
+            cd ../..
+          done
+
+      - name: Publish shim package
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          cd npm/getapi-cli
+          npm publish --access public
+
+  update-homebrew:
+    needs: github-release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: getapi
+          homebrew-tap: m2de/homebrew-tap
+          download-url: https://github.com/m2de/getapi/archive/refs/tags/${{ github.ref_name }}.tar.gz
+        env:
+          COMMITTER_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
