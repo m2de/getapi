@@ -43,4 +43,3 @@ pub fn run(
         available.join(", "),
     ))
 }
-

@@ -18,10 +18,7 @@ pub fn handle(command: &str, message: &str, ctx: &RunContext) -> Result<()> {
     ui::print_info(&expanded_msg);
     ui::print_command(&expanded_cmd);
 
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg(&expanded_cmd)
-        .status()?;
+    let output = Command::new("sh").arg("-c").arg(&expanded_cmd).status()?;
 
     if output.success() {
         ui::print_success("Command completed successfully.");

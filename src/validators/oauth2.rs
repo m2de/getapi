@@ -12,47 +12,34 @@ use crate::recipe::template;
 /// - `grant_type`: Grant type string (default: "client_credentials")
 /// - `scope`: Optional scope parameter
 /// - `auth_method`: How to send credentials — "basic" (default) or "body"
-pub fn validate(
-    values: &HashMap<String, String>,
-    config: &HashMap<String, String>,
-) -> Result<()> {
-    let token_url = config
-        .get("token_url")
-        .ok_or_else(|| {
-            GetapiError::ValidationFailed(
-                "oauth2_client_credentials requires 'token_url' in config".to_string(),
-            )
-        })?;
+pub fn validate(values: &HashMap<String, String>, config: &HashMap<String, String>) -> Result<()> {
+    let token_url = config.get("token_url").ok_or_else(|| {
+        GetapiError::ValidationFailed(
+            "oauth2_client_credentials requires 'token_url' in config".to_string(),
+        )
+    })?;
     let token_url = template::expand(token_url, values)?;
 
-    let client_id_field = config
-        .get("client_id_field")
-        .ok_or_else(|| {
-            GetapiError::ValidationFailed(
-                "oauth2_client_credentials requires 'client_id_field' in config".to_string(),
-            )
-        })?;
-    let client_secret_field = config
-        .get("client_secret_field")
-        .ok_or_else(|| {
-            GetapiError::ValidationFailed(
-                "oauth2_client_credentials requires 'client_secret_field' in config".to_string(),
-            )
-        })?;
+    let client_id_field = config.get("client_id_field").ok_or_else(|| {
+        GetapiError::ValidationFailed(
+            "oauth2_client_credentials requires 'client_id_field' in config".to_string(),
+        )
+    })?;
+    let client_secret_field = config.get("client_secret_field").ok_or_else(|| {
+        GetapiError::ValidationFailed(
+            "oauth2_client_credentials requires 'client_secret_field' in config".to_string(),
+        )
+    })?;
 
-    let client_id = values
-        .get(client_id_field)
-        .ok_or_else(|| {
-            GetapiError::ValidationFailed(format!("{} not found in collected values", client_id_field))
-        })?;
-    let client_secret = values
-        .get(client_secret_field)
-        .ok_or_else(|| {
-            GetapiError::ValidationFailed(format!(
-                "{} not found in collected values",
-                client_secret_field
-            ))
-        })?;
+    let client_id = values.get(client_id_field).ok_or_else(|| {
+        GetapiError::ValidationFailed(format!("{} not found in collected values", client_id_field))
+    })?;
+    let client_secret = values.get(client_secret_field).ok_or_else(|| {
+        GetapiError::ValidationFailed(format!(
+            "{} not found in collected values",
+            client_secret_field
+        ))
+    })?;
 
     let grant_type = config
         .get("grant_type")
@@ -106,8 +93,16 @@ fn base64_encode(input: &str) -> String {
     let mut i = 0;
     while i < bytes.len() {
         let b0 = bytes[i] as u32;
-        let b1 = if i + 1 < bytes.len() { bytes[i + 1] as u32 } else { 0 };
-        let b2 = if i + 2 < bytes.len() { bytes[i + 2] as u32 } else { 0 };
+        let b1 = if i + 1 < bytes.len() {
+            bytes[i + 1] as u32
+        } else {
+            0
+        };
+        let b2 = if i + 2 < bytes.len() {
+            bytes[i + 2] as u32
+        } else {
+            0
+        };
         let triple = (b0 << 16) | (b1 << 8) | b2;
         result.push(CHARSET[((triple >> 18) & 0x3F) as usize] as char);
         result.push(CHARSET[((triple >> 12) & 0x3F) as usize] as char);

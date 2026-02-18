@@ -2,20 +2,12 @@ use console::style;
 
 pub fn print_header(name: &str, description: &str) {
     println!();
-    println!(
-        "{}  {}",
-        style("▸").cyan().bold(),
-        style(name).bold()
-    );
+    println!("{}  {}", style("▸").cyan().bold(), style(name).bold());
     println!("  {}", style(description).dim());
 }
 
 pub fn print_meta(label: &str, value: &str) {
-    println!(
-        "  {} {}",
-        style(format!("{}:", label)).dim(),
-        value
-    );
+    println!("  {} {}", style(format!("{}:", label)).dim(), value);
 }
 
 pub fn print_step_counter(current: usize, total: usize) {
@@ -54,4 +46,3 @@ pub fn print_bullet(message: &str) {
 pub fn print_pause(message: &str) {
     println!("  {} {}", style("⏸").cyan().bold(), message);
 }
-

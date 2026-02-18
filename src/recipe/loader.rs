@@ -52,11 +52,7 @@ pub fn load_from_directory(dir: &str) -> Result<Vec<Recipe>> {
             match serde_json::from_str::<Recipe>(&contents) {
                 Ok(recipe) => recipes.push(recipe),
                 Err(e) => {
-                    eprintln!(
-                        "Warning: skipping invalid recipe {}: {}",
-                        p.display(),
-                        e
-                    );
+                    eprintln!("Warning: skipping invalid recipe {}: {}", p.display(), e);
                 }
             }
         }

@@ -6,7 +6,12 @@ use crate::recipe::types::Choice;
 use crate::runner::context::RunContext;
 use crate::ui;
 
-pub fn handle(step_id: &str, message: &str, choices: &[Choice], ctx: &mut RunContext) -> Result<()> {
+pub fn handle(
+    step_id: &str,
+    message: &str,
+    choices: &[Choice],
+    ctx: &mut RunContext,
+) -> Result<()> {
     let expanded = template::expand(message, &ctx.vars)?;
 
     if ctx.non_interactive {

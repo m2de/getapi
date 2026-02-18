@@ -85,15 +85,9 @@ pub fn run(recipe: &Recipe, ctx: &mut RunContext) -> Result<()> {
 
 fn execute_step(step: &Step, ctx: &mut RunContext) -> Result<()> {
     match step {
-        Step::Info { message, .. } => {
-            steps::info::handle(message, ctx)
-        }
-        Step::OpenUrl { url, message, .. } => {
-            steps::open_url::handle(url, message, ctx)
-        }
-        Step::PromptConfirm { message, .. } => {
-            steps::prompt_confirm::handle(message, ctx)
-        }
+        Step::Info { message, .. } => steps::info::handle(message, ctx),
+        Step::OpenUrl { url, message, .. } => steps::open_url::handle(url, message, ctx),
+        Step::PromptConfirm { message, .. } => steps::prompt_confirm::handle(message, ctx),
         Step::PromptInput {
             message,
             output_key,
@@ -127,9 +121,7 @@ fn execute_step(step: &Step, ctx: &mut RunContext) -> Result<()> {
             config,
             ctx,
         ),
-        Step::Output { message, .. } => {
-            steps::output::handle(message, ctx)
-        }
+        Step::Output { message, .. } => steps::output::handle(message, ctx),
         Step::RunCommand {
             command, message, ..
         } => steps::run_command::handle(command, message, ctx),
@@ -138,8 +130,8 @@ fn execute_step(step: &Step, ctx: &mut RunContext) -> Result<()> {
             resume_hint,
             ..
         } => steps::wait::handle(message, resume_hint.as_deref(), ctx),
-        Step::CopyToClipboard {
-            value, message, ..
-        } => steps::copy_clipboard::handle(value, message, ctx),
+        Step::CopyToClipboard { value, message, .. } => {
+            steps::copy_clipboard::handle(value, message, ctx)
+        }
     }
 }

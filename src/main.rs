@@ -40,7 +40,9 @@ fn run(cli: Cli) -> Result<()> {
     }
 
     match &cli.command {
-        Some(Command::List { search, category }) => cmd_list(&registry, search.clone(), category.clone()),
+        Some(Command::List { search, category }) => {
+            cmd_list(&registry, search.clone(), category.clone())
+        }
         Some(Command::Status) => cmd_status(&registry),
         Some(Command::Resume { provider }) => cmd_resume(&registry, provider, &cli),
         Some(Command::Validate { provider }) => cmd_validate(&registry, provider),
@@ -74,15 +76,14 @@ fn run_provider_setup(recipe: &recipe::types::Recipe, cli: &Cli) -> Result<()> {
     // Check if credentials already exist (UAC-12)
     if !cli.non_interactive {
         let existing = env_output::read_existing(&output_file);
-        let all_present = recipe
-            .outputs
-            .iter()
-            .all(|o| existing.contains_key(&o.key));
+        let all_present = recipe.outputs.iter().all(|o| existing.contains_key(&o.key));
 
         if all_present && !recipe.outputs.is_empty() {
             ui::print_header(&recipe.display_name, &recipe.description);
             println!();
-            ui::print_success("All credentials for this provider already exist in your output file.");
+            ui::print_success(
+                "All credentials for this provider already exist in your output file.",
+            );
             println!();
             let keys: Vec<&str> = recipe.outputs.iter().map(|o| o.key.as_str()).collect();
             ui::print_info(&format!("Found: {}", keys.join(", ")));
@@ -102,13 +103,17 @@ fn run_provider_setup(recipe: &recipe::types::Recipe, cli: &Cli) -> Result<()> {
             match choice {
                 0 => {
                     for step in &recipe.steps {
-                        if let recipe::types::Step::Validate { method, message, on_success, on_failure, config, .. } = step {
-                            let ctx = RunContext::new(
-                                cli.output.clone(),
-                                output_file.clone(),
-                                false,
-                                0,
-                            );
+                        if let recipe::types::Step::Validate {
+                            method,
+                            message,
+                            on_success,
+                            on_failure,
+                            config,
+                            ..
+                        } = step
+                        {
+                            let ctx =
+                                RunContext::new(cli.output.clone(), output_file.clone(), false, 0);
                             let ctx = RunContext {
                                 collected: existing,
                                 ..ctx
@@ -133,7 +138,12 @@ fn run_provider_setup(recipe: &recipe::types::Recipe, cli: &Cli) -> Result<()> {
     }
 
     let total_steps = recipe.steps.len();
-    let mut ctx = RunContext::new(cli.output.clone(), output_file.clone(), cli.non_interactive, total_steps);
+    let mut ctx = RunContext::new(
+        cli.output.clone(),
+        output_file.clone(),
+        cli.non_interactive,
+        total_steps,
+    );
 
     let mut session = Session::new(
         &recipe.id,
@@ -178,7 +188,12 @@ fn cmd_resume(registry: &RecipeRegistry, provider: &str, cli: &Cli) -> Result<()
         .unwrap_or(session.output_file.clone());
 
     let total_steps = recipe.steps.len();
-    let mut ctx = RunContext::new(cli.output.clone(), output_file.clone(), cli.non_interactive, total_steps);
+    let mut ctx = RunContext::new(
+        cli.output.clone(),
+        output_file.clone(),
+        cli.non_interactive,
+        total_steps,
+    );
 
     // Restore session state
     ctx.completed_steps = session.completed_steps.clone();
@@ -298,7 +313,11 @@ fn cmd_validate(registry: &RecipeRegistry, provider: &str) -> Result<()> {
     Ok(())
 }
 
-fn cmd_list(registry: &RecipeRegistry, search: Option<String>, category: Option<String>) -> Result<()> {
+fn cmd_list(
+    registry: &RecipeRegistry,
+    search: Option<String>,
+    category: Option<String>,
+) -> Result<()> {
     let recipes = if let Some(ref query) = search {
         registry.search(query)
     } else if let Some(ref cat) = category {
@@ -348,9 +367,7 @@ fn cmd_status(registry: &RecipeRegistry) -> Result<()> {
         let status_str = match session.status {
             SessionStatus::InProgress => console::style("in progress").yellow().to_string(),
             SessionStatus::Paused => console::style("paused").yellow().to_string(),
-            SessionStatus::Completed => {
-                console::style("done ✓").green().to_string()
-            }
+            SessionStatus::Completed => console::style("done ✓").green().to_string(),
         };
 
         let display_name = recipe

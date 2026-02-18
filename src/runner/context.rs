@@ -28,7 +28,12 @@ pub struct RunContext {
 }
 
 impl RunContext {
-    pub fn new(output_format: OutputFormat, output_file: String, non_interactive: bool, total_steps: usize) -> Self {
+    pub fn new(
+        output_format: OutputFormat,
+        output_file: String,
+        non_interactive: bool,
+        total_steps: usize,
+    ) -> Self {
         Self {
             vars: HashMap::new(),
             collected: HashMap::new(),

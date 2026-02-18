@@ -14,7 +14,11 @@ pub fn handle(
     ctx: &RunContext,
 ) -> Result<()> {
     if ctx.non_interactive {
-        println!("  {} Validate credentials using: {}", console::style("→").cyan(), method);
+        println!(
+            "  {} Validate credentials using: {}",
+            console::style("→").cyan(),
+            method
+        );
         return Ok(());
     }
 
