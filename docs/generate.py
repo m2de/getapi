@@ -107,6 +107,8 @@ def load_providers() -> list[dict]:
     """Load all provider JSON files, sorted by display_name."""
     providers = []
     for path in sorted(PROVIDERS_DIR.glob("*.json")):
+        if path.name == "index.json":
+            continue
         with open(path) as f:
             data = json.load(f)
         providers.append(data)
