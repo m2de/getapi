@@ -1,17 +1,17 @@
 class Getapi < Formula
   desc "Guided, interactive walkthroughs for setting up developer API credentials"
   homepage "https://github.com/m2de/getapi"
-  version "1.0.0"
+  version "1.1.0"
   license "MIT"
 
   on_arm do
-    url "https://github.com/m2de/getapi/releases/download/v1.0.0/getapi-aarch64-apple-darwin.tar.gz"
-    sha256 "20e0baf8ffd4b9c559911e1ff926aafb167e48445456aead9eec18c67ad7fa15"
+    url "https://github.com/m2de/getapi/releases/download/v1.1.0/getapi-aarch64-apple-darwin.tar.gz"
+    sha256 "e19f14173197c32048a7565b58c0e9d07f30fe36fe76994cf24d7ce4dcf9641c"
   end
 
   on_intel do
-    url "https://github.com/m2de/getapi/releases/download/v1.0.0/getapi-x86_64-apple-darwin.tar.gz"
-    sha256 "0258c369d1687d481f34a5638b19068a5238c09345505e9993ab1ecf3694df28"
+    url "https://github.com/m2de/getapi/releases/download/v1.1.0/getapi-x86_64-apple-darwin.tar.gz"
+    sha256 "a676461ebe41a6ecce65d5050d8ea4e947ddd58f1cdead138e8bfa062f719681"
   end
 
   def install
