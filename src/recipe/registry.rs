@@ -1,4 +1,7 @@
+use std::collections::HashMap;
+
 use crate::recipe::loader;
+use crate::recipe::remote;
 use crate::recipe::types::Recipe;
 
 pub struct RecipeRegistry {
@@ -7,7 +10,9 @@ pub struct RecipeRegistry {
 
 impl RecipeRegistry {
     pub fn new() -> Self {
-        let recipes = loader::load_all_bundled();
+        let bundled = loader::load_all_bundled();
+        let cached = remote::load_cached_recipes();
+        let recipes = merge_recipes(bundled, cached);
         Self { recipes }
     }
 
@@ -46,4 +51,18 @@ impl RecipeRegistry {
             .filter(|r| r.category.iter().any(|c| c.to_lowercase() == cat))
             .collect()
     }
+}
+
+/// Merge two recipe lists. `overlay` takes precedence when the same `id` appears in both.
+fn merge_recipes(base: Vec<Recipe>, overlay: Vec<Recipe>) -> Vec<Recipe> {
+    let mut map: HashMap<String, Recipe> = HashMap::new();
+    for recipe in base {
+        map.insert(recipe.id.clone(), recipe);
+    }
+    for recipe in overlay {
+        map.insert(recipe.id.clone(), recipe);
+    }
+    let mut merged: Vec<Recipe> = map.into_values().collect();
+    merged.sort_by(|a, b| a.id.cmp(&b.id));
+    merged
 }

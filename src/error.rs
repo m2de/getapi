@@ -37,6 +37,9 @@ pub enum GetapiError {
 
     #[error("HTTP error: {0}")]
     Http(#[from] reqwest::Error),
+
+    #[error("Failed to fetch remote recipes: {0}")]
+    RemoteFetch(String),
 }
 
 pub type Result<T> = std::result::Result<T, GetapiError>;

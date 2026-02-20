@@ -40,6 +40,7 @@ fn run(cli: Cli) -> Result<()> {
     }
 
     match &cli.command {
+        Some(Command::Update) => cmd_update(),
         Some(Command::List { search, category }) => {
             cmd_list(&registry, search.clone(), category.clone())
         }
@@ -449,6 +450,23 @@ fn cmd_manifest(registry: &RecipeRegistry, _cli: &Cli) -> Result<()> {
             ui::print_info("Run `getapi list` to see available providers.");
             ui::print_info("Run `getapi --help` for full usage information.");
             Ok(())
+        }
+    }
+}
+
+fn cmd_update() -> Result<()> {
+    ui::print_info("Fetching latest recipes from the remote repository...");
+    match recipe::remote::fetch_and_cache_all() {
+        Ok(recipes) => {
+            ui::print_success(&format!(
+                "Updated {} recipes. Run `getapi list` to see available providers.",
+                recipes.len()
+            ));
+            Ok(())
+        }
+        Err(e) => {
+            eprintln!("\n  {} {}", console::style("Warning:").yellow().bold(), e);
+            std::process::exit(1);
         }
     }
 }

@@ -42,3 +42,8 @@ jobs:
             fi
           done
           exit $exit_code
+
+      - name: Validate recipe index
+        run: |
+          bash scripts/generate-index.sh
+          git diff --exit-code providers/index.json

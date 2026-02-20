@@ -7,7 +7,7 @@ use clap::{Parser, Subcommand, ValueEnum};
              getapi walks you through creating API keys for popular platforms like Twitter, \
              OpenAI, Stripe, and more. It opens the right pages, tells you what to click, \
              collects your credentials, validates they work, and writes them to .env.\n\n\
-             Provider recipes are bundled — no network needed to run a setup flow.",
+             Provider recipes are bundled. Run `getapi update` to fetch the latest recipes.",
     long_about = None,
     after_help = "\
 EXAMPLES:\n  \
@@ -90,6 +90,9 @@ pub enum Command {
         /// Provider to reset (omit to reset all)
         provider: Option<String>,
     },
+
+    /// Update provider recipes from the remote repository
+    Update,
 }
 
 #[derive(ValueEnum, Clone, Debug, PartialEq)]

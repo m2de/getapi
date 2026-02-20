@@ -18,6 +18,16 @@ cargo test
 - `docs/` — Documentation site source (GitHub Pages)
 - `homebrew/` — Local copy of Homebrew formula (canonical copy lives in `m2de/homebrew-tap`)
 
+## Modifying recipes
+
+When adding, removing, or changing the `version` field of any file in `providers/`, regenerate the index:
+
+```sh
+bash scripts/generate-index.sh
+```
+
+The CI `validate-recipes` job checks that `providers/index.json` is up to date.
+
 ## Release process
 
 1. Update `version` in `Cargo.toml` and all 6 `npm/*/package.json` files

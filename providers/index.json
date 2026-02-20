@@ -1,0 +1,106 @@
+{
+  "schema_version": "1",
+  "updated_at": "2026-02-20T09:55:01Z",
+  "recipes": [
+    {
+      "id": "anthropic",
+      "file": "anthropic.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "auth0",
+      "file": "auth0.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "clerk",
+      "file": "clerk.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "cloudflare",
+      "file": "cloudflare.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "discord",
+      "file": "discord.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "firebase",
+      "file": "firebase.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "github",
+      "file": "github.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "google-maps",
+      "file": "google-maps.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "notion",
+      "file": "notion.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "openai",
+      "file": "openai.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "resend",
+      "file": "resend.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "sendgrid",
+      "file": "sendgrid.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "shopify",
+      "file": "shopify.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "slack",
+      "file": "slack.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "spotify",
+      "file": "spotify.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "stripe",
+      "file": "stripe.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "supabase",
+      "file": "supabase.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "twilio",
+      "file": "twilio.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "twitter",
+      "file": "twitter.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "vercel",
+      "file": "vercel.json",
+      "version": "1.0.0"
+    }
+  ]
+}
