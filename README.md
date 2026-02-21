@@ -12,6 +12,9 @@
 # Install
 cargo install getapi
 
+# Fetch the latest provider recipes
+getapi update
+
 # Set up Twitter API credentials
 getapi twitter
 
@@ -48,7 +51,7 @@ Prebuilt binaries for macOS, Linux, and Windows are available on the [GitHub Rel
 
 ## Providers
 
-getapi ships with 20 built-in provider recipes:
+getapi bundles 20 provider recipes for offline use. Run `getapi update` to fetch the latest recipes from the repository — new and updated providers are available without reinstalling:
 
 | Provider | Category | Estimated Time |
 |----------|----------|---------------|
@@ -88,10 +91,13 @@ getapi openai
 ### Commands
 
 ```sh
-getapi <provider>       # Start guided setup for a provider
-getapi list             # List all available providers
-getapi resume           # Resume a paused setup session
-getapi status           # Show active sessions
+getapi <provider>         # Start guided setup for a provider
+getapi list               # List all available providers
+getapi update             # Fetch the latest provider recipes
+getapi resume <provider>  # Resume a paused setup session
+getapi status             # Show active sessions
+getapi validate <p>       # Re-run credential validation
+getapi reset [provider]   # Clear session data (one provider or all)
 ```
 
 ### Options
@@ -101,6 +107,7 @@ getapi status           # Show active sessions
 --output-file <path>    # Write credentials to a specific file
 --non-interactive       # Print steps without prompts (for CI/docs)
 --recipe <path>         # Use a custom recipe JSON file
+--recipe-dir <path>     # Load recipes from a directory
 ```
 
 ### Manifest file
@@ -122,7 +129,7 @@ getapi is designed to work well with AI coding agents:
 
 - **`getapi <provider> --help`** shows the full setup flow without running it
 - **`getapi <provider> --non-interactive`** prints all steps as plain text, so an agent can relay instructions to a user or parse the credential requirements
-- All provider recipes are JSON files in `providers/` and can be read directly
+- All provider recipes are JSON files and can be read directly; bundled ones live in `providers/`, and fetched ones are cached locally after `getapi update`
 
 ## Adding a Provider
 
@@ -130,10 +137,11 @@ The most common contribution is adding a new provider recipe. See [CONTRIBUTING.
 
 ## How It Works
 
-1. **Recipe files** in `providers/` define the step-by-step flow for each service as JSON
-2. **The runner** walks the user through each step: opening URLs, prompting for input, offering choices, and validating credentials
-3. **Sessions** track progress so you can pause and resume long setup flows
-4. **Output** writes collected credentials to `.env`, JSON, or YAML files
+1. **Recipe files** define the step-by-step flow for each service as JSON
+2. **Bundled recipes** are embedded in the binary and work offline; run `getapi update` to fetch the latest recipes from GitHub without reinstalling
+3. **The runner** walks the user through each step: opening URLs, prompting for input, offering choices, and validating credentials
+4. **Sessions** track progress so you can pause and resume long setup flows
+5. **Output** writes collected credentials to `.env`, JSON, or YAML files
 
 ## Licence
 
