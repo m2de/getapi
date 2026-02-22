@@ -9,7 +9,7 @@
   "estimated_time": "5 minutes",
   "prerequisites": [
     "A Notion account",
-    "A Notion workspace where you have admin or member access"
+    "A Notion workspace where you have owner access"
   ],
   "outputs": [
     {
@@ -27,7 +27,7 @@
     {
       "id": "open_integrations",
       "type": "open_url",
-      "url": "https://www.notion.so/my-integrations",
+      "url": "https://www.notion.so/profile/integrations/internal",
       "message": "Opening the Notion integrations page. Sign in if prompted."
     },
     {
@@ -58,7 +58,7 @@
       "id": "collect_token",
       "type": "prompt_input",
       "output_key": "NOTION_API_KEY",
-      "message": "Under 'Internal Integration Secret', click 'Show' and copy the token. Paste it here:",
+      "message": "Under 'Internal Integration Secret' in the Configuration tab, click 'Show' and copy the token. Paste it here:",
       "validation": "^(ntn_|secret_)[a-zA-Z0-9]{20,}$",
       "validation_error": "That doesn't look like a valid Notion integration token. It should start with 'ntn_' or 'secret_'."
     },
@@ -96,5 +96,5 @@
     "If using the API directly (not a client library), you must include both 'Authorization: Bearer <token>' and 'Notion-Version: 2022-06-28' headers."
   ],
   "version": "1.0.0",
-  "last_verified": "2026-02-15"
+  "last_verified": "2026-02-22"
 }
