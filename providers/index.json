@@ -1,6 +1,6 @@
 {
   "schema_version": "1",
-  "updated_at": "2026-02-20T09:55:01Z",
+  "updated_at": "2026-03-28T11:36:21Z",
   "recipes": [
     {
       "id": "anthropic",
@@ -85,6 +85,11 @@
     {
       "id": "supabase",
       "file": "supabase.json",
+      "version": "1.0.0"
+    },
+    {
+      "id": "telegram",
+      "file": "telegram.json",
       "version": "1.0.0"
     },
     {
