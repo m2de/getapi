@@ -1,0 +1,86 @@
+{
+  "schema_version": "1",
+  "id": "telegram",
+  "display_name": "Telegram Bot API",
+  "description": "Set up a Telegram bot and get an API token for sending messages, managing groups, and building bot interactions.",
+  "category": ["messaging", "bots"],
+  "website": "https://core.telegram.org/bots/api",
+  "auth_types": ["api_key"],
+  "estimated_time": "5 minutes",
+  "prerequisites": [
+    "A Telegram account"
+  ],
+  "outputs": [
+    {
+      "key": "TELEGRAM_BOT_TOKEN",
+      "description": "Bot token for authenticating requests to the Telegram Bot API",
+      "sensitive": true
+    }
+  ],
+  "steps": [
+    {
+      "id": "intro",
+      "type": "info",
+      "message": "We'll get you a Telegram bot token via BotFather, the official tool for creating and managing Telegram bots."
+    },
+    {
+      "id": "open_botfather",
+      "type": "open_url",
+      "url": "https://t.me/BotFather",
+      "message": "Opening BotFather in Telegram. This is the official bot for creating and managing Telegram bots."
+    },
+    {
+      "id": "check_existing",
+      "type": "prompt_choice",
+      "message": "Do you already have a bot you want to use?",
+      "choices": [
+        { "label": "Create a new bot", "next": "create_bot" },
+        { "label": "Use an existing bot", "next": "existing_bot" }
+      ]
+    },
+    {
+      "id": "create_bot",
+      "type": "info",
+      "message": "Send /newbot to BotFather. It will ask you for a display name (can be anything) and then a username (must end in 'bot', e.g. 'my_cool_bot'). Once done, BotFather will reply with your bot token."
+    },
+    {
+      "id": "confirm_created",
+      "type": "prompt_confirm",
+      "message": "Bot created?"
+    },
+    {
+      "id": "existing_bot",
+      "type": "info",
+      "message": "Send /mybots to BotFather, select your bot, then tap 'API Token' to view the token."
+    },
+    {
+      "id": "collect_token",
+      "type": "prompt_input",
+      "output_key": "TELEGRAM_BOT_TOKEN",
+      "message": "Paste your bot token here (looks like 123456789:ABCdefGhI...):",
+      "validation": "^\\d{8,}:[A-Za-z0-9_-]{30,}$",
+      "validation_error": "That doesn't look like a valid Telegram bot token. It should be a number, followed by a colon, followed by a long alphanumeric string (e.g. 123456789:ABCdefGhIJklmNOPqrsTUVwxyz)."
+    },
+    {
+      "id": "validate_token",
+      "type": "validate",
+      "method": "http_get",
+      "depends_on": ["collect_token"],
+      "message": "Checking your bot token works...",
+      "on_success": "Bot token verified. Your bot is ready to use.",
+      "on_failure": "Couldn't verify the token. Make sure you copied it correctly and the bot hasn't been deleted.",
+      "config": {
+        "url": "https://api.telegram.org/bot{{TELEGRAM_BOT_TOKEN}}/getMe"
+      }
+    }
+  ],
+  "gotchas": [
+    "Bot tokens don't expire, but can be revoked by sending /revoke to BotFather.",
+    "Bots can't message users first. A user must send /start to your bot before it can reply to them.",
+    "Bot usernames must end in 'bot' (e.g. 'my_cool_bot' or 'MyCoolBot').",
+    "The API rate limit is roughly 30 messages per second globally and 1 message per second per individual chat.",
+    "For webhooks, you need a publicly accessible HTTPS URL. Self-signed certificates are supported."
+  ],
+  "version": "1.0.0",
+  "last_verified": "2026-03-28"
+}
